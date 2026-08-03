@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Menu, X, Phone, Clock, Instagram, Facebook, ChevronDown, Bike, ShoppingBag, Star, MapPin, Flame, Globe } from "lucide-react";
+import { Menu, X, Phone, Clock, Instagram, Facebook, ChevronDown, Bike, ShoppingBag, Star, MapPin, Globe, Flame, Tag } from "lucide-react";
 import { ImageWithFallback } from "@/app/components/figma/ImageWithFallback";
 import brandLogo from "@/imports/image.png";
 
@@ -8,60 +8,95 @@ const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=Ol%C3%A1!%20Quero%20
 
 const NAV_LINKS = ["Início", "Cardápio", "Sobre", "Pedido"];
 
-// ─── MENU DATA ────────────────────────────────────────────────
+// ─── CARDÁPIO COMPLETO ────────────────────────────────────────
+
+const BARCAS = [
+  {
+    name: "Barca Hot",
+    desc: "4 Joy grelhados · 4 Niguiri grelhados · 4 Sushi Uramaki Skin · 4 Hot Especial · 4 Hot Doritos · 4 Hot Salmão",
+    price: "R$ 94,90",
+  },
+  {
+    name: "Barca Salmão",
+    desc: "10 Sashimis · 4 Filadélfia · 4 Skin · 4 Hot Especial · 6 Uramaki Salmão · 6 Hossomaki Salmão",
+    price: "R$ 99,90",
+  },
+  {
+    name: "Mini Barca Salmão",
+    desc: "05 Sashimis · 06 Uramaki Salmão · 06 Hossomaki Salmão",
+    price: "R$ 59,90",
+  },
+];
+
 const COMBINADOS = [
-  { name: "Combo 20 Peças", desc: "20 unidades variadas", price: "R$ 49,90" },
-  { name: "Combo 40 Peças", desc: "40 unidades variadas", price: "R$ 94,90" },
-  { name: "Combo 60 Peças", desc: "60 unidades variadas", price: "R$ 139,90" },
+  { name: "Combinado Califórnia", desc: "1 Temaki Califórnia · 4 Uramaki Califórnia · 2 Niguiri de Kani", price: "R$ 39,90" },
+  { name: "Combinado Casal", desc: "02 Temaki Salmão Completo · 04 Filadélfia · 04 Uramaki Filadélfia", price: "R$ 74,90" },
+  { name: "Combinado Casal Hot", desc: "02 Temaki Hot · 04 Sushi Filadélfia · 04 Uramaki Filadélfia", price: "R$ 76,90" },
+  { name: "Combinado Hot + Filadélfia", desc: "4 Hot Roll Salmão · 4 Sushi Filadélfia", price: "R$ 25,90" },
+  { name: "Combinado Joy", desc: "04 Joy Salmão · 04 Joy Pepino · 04 Joy Salmão Grelhado", price: "R$ 58,90" },
+  { name: "Combinado Joy + Niguiri", desc: "04 Joy Salmão · 04 Niguiri", price: "R$ 28,90" },
+  { name: "Combinado Misto Hossomaki", desc: "6 Hossomaki Skin · 6 Hossomaki Pepino · 6 Hossomaki Kani · 6 Mini Hot Roll · 6 Uramaki Salmão · 6 Hossomaki Salmão", price: "R$ 79,90" },
+  { name: "Combinado Nachos", desc: "1 Temaki Salmão Grelhado · 4 Hot Roll Doritos Especial", price: "R$ 42,90" },
+  { name: "Combinado Sushi Uramaki", desc: "08 Uramaki Filadélfia · 08 Uramaki Califórnia · 06 Uramaki Skin", price: "R$ 59,90" },
+  { name: "Combinado Temaki + Hot", desc: "01 Temaki Salmão · 04 Hot Roll", price: "R$ 39,90" },
+  { name: "Combinado Temaki + Joy", desc: "01 Temaki Salmão Completo · 04 Joy Salmão", price: "R$ 41,90" },
+  { name: "Combinado Temaki + Niguiri", desc: "01 Temaki Salmão Completo · 04 Niguiri", price: "R$ 38,90" },
+  { name: "Combinado Temaki + Sashimi", desc: "01 Temaki Salmão Completo · 05 Sashimis", price: "R$ 41,90" },
+  { name: "Temaki Hot + Hot", desc: "01 Temaki Hot · 04 Hot Roll", price: "R$ 41,90" },
+];
+
+const PROMOCOES = [
+  { name: "Promoção Combinado Casal", desc: "02 Temaki Salmão Completo · 04 Filadélfia · 04 Uramaki Filadélfia", oldPrice: "R$ 74,90", price: "R$ 68,90" },
+  { name: "Promoção Combinado Casal Hot", desc: "02 Temaki Salmão Completo · 04 Filadélfia · 04 Uramaki Filadélfia", oldPrice: null, price: "R$ 69,90" },
+  { name: "Promoção Hot Roll Salmão", desc: "Arroz, salmão, cream cheese e cebolinha · 8 unidades", oldPrice: "R$ 29,90", price: "R$ 25,90" },
+  { name: "Promoção Mini Barca", desc: "05 Sashimis · 06 Uramaki Salmão · 06 Hossomaki Salmão", oldPrice: "R$ 59,90", price: "R$ 49,90" },
+  { name: "Promoção Sushi Uramaki Skin", desc: "Arroz com gergilim, pele de salmão frita, cream cheese e cebolinha · 8 unidades", oldPrice: "R$ 22,90", price: "R$ 18,90" },
+  { name: "Promoção Temaki Hot", desc: "Salmão, cream cheese, cebolinha, arroz e panko", oldPrice: "R$ 31,90", price: "R$ 26,90" },
+  { name: "Temaki Hot + Hot (Promo)", desc: "01 Temaki Hot · 04 Hot Roll", oldPrice: null, price: "R$ 37,90" },
 ];
 
 const TEMAKIS = [
-  { name: "Salmão", desc: "", price: "R$ 28,90" },
-  { name: "Salmão c/ Cream Cheese", desc: "", price: "R$ 30,90" },
-  { name: "Filadélfia", desc: "", price: "R$ 32,90" },
-  { name: "Skin", desc: "", price: "R$ 28,90" },
+  { name: "Temaki Califórnia", desc: "Arroz, kani, manga e pepino", price: "R$ 26,90" },
+  { name: "Temaki Grill", desc: "Arroz, salmão grelhado, cream cheese e cebolinha", price: "R$ 29,90" },
+  { name: "Temaki Hot", desc: "Salmão, cream cheese, cebolinha, arroz e panko", price: "R$ 31,90" },
+  { name: "Temaki Salmão Completo", desc: "Arroz, salmão, cream cheese e cebolinha", price: "R$ 28,90" },
+  { name: "Temaki Skin", desc: "Arroz, pele de salmão frita e cream cheese", price: "R$ 25,90" },
 ];
 
 const HOT_ROLLS = [
-  { name: "Hot Roll Tradicional", desc: "Salmão, cream cheese, cebolinha e empanado.", qty: "10un.", price: "R$ 28,90" },
-  { name: "Hot Roll Especial", desc: "Salmão, kani, cream cheese, cebolinha e empanado.", qty: "10un.", price: "R$ 30,90" },
-  { name: "Hot Roll Califórnia", desc: "Kani, pepino, avocado e gergelim.", qty: "10un.", price: "R$ 32,90" },
+  { name: "Hot Roll Doritos Especial", desc: "Arroz, salmão grelhado, cream cheese, cebolinha e doritos · 8 unidades", price: "R$ 35,90" },
+  { name: "Hot Roll Especial", desc: "Arroz, salmão, cream cheese e cebolinha · 8 unidades", price: "R$ 35,90" },
+  { name: "Hot Roll Salmão", desc: "Arroz, salmão, cream cheese e cebolinha · 8 unidades", price: "R$ 29,90" },
 ];
 
 const URAMAKIS = [
-  { name: "Uramaki Salmão", desc: "Salmão, cream cheese e cebolinha.", qty: "8un.", price: "R$ 24,90" },
-  { name: "Uramaki Filadélfia", desc: "Salmão, cream cheese e cebolinha.", qty: "8un.", price: "R$ 26,90" },
-  { name: "Uramaki Califórnia", desc: "Kani, pepino, avocado e gergelim.", qty: "8un.", price: "R$ 22,90" },
-  { name: "Uramaki Skin", desc: "Pele de salmão, cream cheese e cebolinha.", qty: "8un.", price: "R$ 24,90" },
+  { name: "Sushi Filadélfia", desc: "Arroz, salmão, cream cheese e cebolinha · 8 unidades", price: "R$ 24,90" },
+  { name: "Sushi Uramaki Califórnia", desc: "Arroz com gergilim, kani, manga e pepino · 8 unidades", price: "R$ 24,90" },
+  { name: "Sushi Uramaki Filadélfia", desc: "Arroz com gergilim, cream cheese e cebolinha · 8 unidades", price: "R$ 25,90" },
+  { name: "Sushi Uramaki Skin", desc: "Arroz com gergilim, pele de salmão frita, cream cheese e cebolinha · 8 unidades", price: "R$ 22,90" },
+  { name: "Uramaki Salmão", desc: "Arroz com gergelim e salmão · 8 unidades", price: "R$ 17,90" },
+  { name: "Uramaki Skin", desc: "Arroz com gergelim, pele de salmão frita, cream cheese e cebolinha · 8 unidades", price: "R$ 22,90" },
 ];
 
-const HOSSOMAKIS = [
-  { name: "Salmão", qty: "8un.", price: "R$ 18,90" },
-  { name: "Kani", qty: "8un.", price: "R$ 16,90" },
-  { name: "Pepino", qty: "8un.", price: "R$ 14,90" },
-];
-
-const SASHIMIS = [
-  { name: "Salmão", qty: "10 fatias", price: "R$ 39,90" },
-];
-
-const BEBIDAS = [
-  { name: "Refrigerante Lata", price: "R$ 7,00" },
-  { name: "Água Mineral", price: "R$ 4,50" },
-  { name: "Cerveja Long Neck", price: "R$ 9,90" },
+const HOSSOMAKIS_OUTROS = [
+  { name: "Hossomaki de Pepino", desc: "Arroz e pepino · 6 unidades", price: "R$ 12,90" },
+  { name: "Hossomaki de Salmão", desc: "Arroz e salmão · 6 unidades", price: "R$ 16,90" },
+  { name: "Joy de Salmão", desc: "Arroz, salmão, cream cheese e cebolinha · 6 unidades", price: "R$ 35,90" },
+  { name: "Niguiri Salmão", desc: "Salmão e arroz · 4 unidades", price: "R$ 14,90" },
+  { name: "Sashimi", desc: "20 unidades", price: "R$ 69,90" },
 ];
 
 const SECTION_IMGS: Record<string, string> = {
-  combinados: "https://images.unsplash.com/photo-1617196035303-964a45bbc9f4?w=800&h=500&fit=crop&auto=format",
-  temakis: "https://images.unsplash.com/photo-1709984110217-57d7d18e5299?w=800&h=500&fit=crop&auto=format",
-  hotrolls: "https://images.unsplash.com/photo-1562436260-8c9216eeb703?w=800&h=500&fit=crop&auto=format",
-  uramakis: "https://images.unsplash.com/photo-1617196035303-964a45bbc9f4?w=800&h=500&fit=crop&auto=format",
+  barcas: "https://images.unsplash.com/photo-1709984110217-57d7d18e5299?w=800&h=600&fit=crop&auto=format",
+  combinados: "https://images.unsplash.com/photo-1617196035303-964a45bbc9f4?w=800&h=600&fit=crop&auto=format",
+  hotrolls: "https://images.unsplash.com/photo-1562436260-8c9216eeb703?w=800&h=600&fit=crop&auto=format",
+  uramakis: "https://images.unsplash.com/photo-1617196035303-964a45bbc9f4?w=800&h=600&fit=crop&auto=format",
 };
 
 const REVIEWS = [
-  { name: "Camila R.", stars: 5, text: "Delivery chegou rapidíssimo e o sushi estava impecável. O Hot Roll Especial é incrível!" },
-  { name: "Andrés M.", stars: 5, text: "Primeira vez pedindo e fiquei encantado. Tudo fresquíssimo e os sabores incríveis." },
-  { name: "Valentina P.", stars: 5, text: "Peço toda semana. O Uramaki Skin é viciante. Nunca chegou tarde nem em mal estado." },
+  { name: "Camila R.", stars: 5, text: "Delivery chegou rapidíssimo e o sushi estava impecável. A Barca Hot é incrível!" },
+  { name: "Marcos S.", stars: 5, text: "Peço toda semana. O Combinado Casal é perfeito. Nunca chegou tarde nem em mal estado." },
+  { name: "Valentina P.", stars: 5, text: "Primeira vez pedindo e fiquei encantado. Tudo fresquíssimo, sabores incríveis." },
 ];
 
 // ─── HELPERS ──────────────────────────────────────────────────
@@ -69,40 +104,53 @@ function orderLink(item: string) {
   return `https://wa.me/${WHATSAPP_NUMBER}?text=Ol%C3%A1!%20Quero%20pedir%3A%20${encodeURIComponent(item)}`;
 }
 
-function SectionHeader({ label, title, sub }: { label: string; title: string; sub?: string }) {
+function SectionHeader({ label, title }: { label: string; title: string }) {
   return (
     <div className="mb-8">
       <p className="text-primary text-[10px] tracking-[0.4em] uppercase mb-2">{label}</p>
       <h3 className="text-3xl md:text-4xl font-black text-foreground" style={{ fontFamily: "'Cinzel', serif" }}>
         {title}
       </h3>
-      {sub && <p className="text-muted-foreground text-sm mt-1">{sub}</p>}
     </div>
   );
 }
 
-function ListItem({ name, desc, qty, price }: { name: string; desc?: string; qty?: string; price: string }) {
+function ListItem({ name, desc, price, oldPrice }: { name: string; desc?: string; price: string; oldPrice?: string | null }) {
   return (
     <a
       href={orderLink(name)}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-start justify-between gap-4 py-4 border-b border-border group hover:bg-card/50 px-1 transition-colors"
+      className="flex items-start justify-between gap-4 py-4 border-b border-border group hover:bg-card/40 px-2 -mx-2 transition-colors rounded"
     >
       <div className="flex-1">
         <span className="text-foreground font-semibold text-sm group-hover:text-primary transition-colors">{name}</span>
-        {qty && <span className="text-muted-foreground text-xs ml-2">({qty})</span>}
         {desc && <p className="text-muted-foreground text-xs mt-0.5 leading-relaxed">{desc}</p>}
       </div>
-      <span className="text-primary font-bold text-sm whitespace-nowrap">{price}</span>
+      <div className="text-right flex-shrink-0">
+        {oldPrice && <p className="text-muted-foreground text-xs line-through">{oldPrice}</p>}
+        <span className="text-primary font-bold text-sm whitespace-nowrap">{price}</span>
+      </div>
     </a>
+  );
+}
+
+function TwoColLayout({ children, imgKey }: { children: React.ReactNode; imgKey: string }) {
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 bg-border">
+      <div className="bg-background p-8 lg:p-12">{children}</div>
+      <div className="bg-card hidden lg:block overflow-hidden h-full min-h-96">
+        <ImageWithFallback src={SECTION_IMGS[imgKey]} alt={imgKey}
+          className="w-full h-full object-cover" />
+      </div>
+    </div>
   );
 }
 
 // ─── APP ──────────────────────────────────────────────────────
 export default function App() {
   const [navOpen, setNavOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("combinados");
+  const [activeTab, setActiveTab] = useState("barcas");
 
   const scrollTo = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
@@ -110,13 +158,13 @@ export default function App() {
   };
 
   const TABS = [
-    { id: "combinados", label: "Combinados" },
-    { id: "temakis", label: "Temakis" },
-    { id: "hotrolls", label: "Hot Rolls" },
-    { id: "uramakis", label: "Uramakis" },
-    { id: "hossomakis", label: "Hossomakis" },
-    { id: "sashimis", label: "Sashimis" },
-    { id: "bebidas", label: "Bebidas" },
+    { id: "barcas", label: "Barcas", icon: <Bike size={12} /> },
+    { id: "combinados", label: "Combinados", icon: null },
+    { id: "promocoes", label: "Promoções", icon: <Tag size={12} /> },
+    { id: "temakis", label: "Temakis", icon: null },
+    { id: "hotrolls", label: "Hot Rolls", icon: <Flame size={12} /> },
+    { id: "uramakis", label: "Uramakis", icon: null },
+    { id: "outros", label: "Outros", icon: null },
   ];
 
   return (
@@ -125,7 +173,7 @@ export default function App() {
       {/* ─── NAV ─── */}
       <header className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-background/90 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <button onClick={() => scrollTo("início")} className="flex items-center group">
+          <button onClick={() => scrollTo("inicio")} className="flex items-center group">
             <ImageWithFallback src={brandLogo} alt="Esthan Sushi" className="h-10 w-10 object-contain" />
             <span className="ml-2 text-xl font-black tracking-widest text-foreground group-hover:text-primary transition-colors" style={{ fontFamily: "'Cinzel', serif" }}>
               ESTHAN<span className="text-primary"> SUSHI</span>
@@ -187,7 +235,7 @@ export default function App() {
             Rolls artesanais frescos na sua porta.
           </p>
           <p className="text-muted-foreground text-sm max-w-sm leading-relaxed mb-10 font-light">
-            Segunda a Sábado · 19h30 às 23h30 · Morro Doce – São Paulo
+            Segunda a Sábado · 19h30 às 23h30 · Vila Nova Cachoeirinha
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4">
@@ -208,7 +256,7 @@ export default function App() {
         </button>
       </section>
 
-      {/* ─── DELIVERY INFO STRIP ─── */}
+      {/* ─── INFO STRIP ─── */}
       <section className="py-10 border-y border-border bg-card">
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-border">
           {[
@@ -232,164 +280,124 @@ export default function App() {
         <div className="max-w-7xl mx-auto">
           <div className="mb-12 text-center">
             <p className="text-primary text-xs tracking-[0.4em] uppercase mb-3">Nossa Carta</p>
-            <h2 className="text-4xl md:text-5xl font-black text-foreground" style={{ fontFamily: "'Cinzel', serif" }}>
-              CARDÁPIO
-            </h2>
+            <h2 className="text-4xl md:text-5xl font-black text-foreground" style={{ fontFamily: "'Cinzel', serif" }}>CARDÁPIO</h2>
           </div>
 
-          {/* tabs */}
-          <div className="flex gap-0 flex-wrap border border-border mb-12 overflow-hidden">
+          {/* TABS */}
+          <div className="flex flex-wrap border border-border mb-12">
             {TABS.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`px-5 py-3 text-xs tracking-widest uppercase font-semibold flex-1 min-w-max transition-all duration-200 border-r border-border last:border-r-0 ${
-                  activeTab === tab.id
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:text-primary hover:bg-card"
-                }`}
-              >
-                {tab.label}
+              <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center gap-1.5 px-4 py-3 text-xs tracking-widest uppercase font-semibold flex-1 min-w-max transition-all duration-200 border-r border-border last:border-r-0 ${
+                  activeTab === tab.id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-primary hover:bg-card"
+                }`}>
+                {tab.icon}{tab.label}
               </button>
             ))}
           </div>
 
-          {/* ── COMBINADOS ── */}
+          {/* BARCAS */}
+          {activeTab === "barcas" && (
+            <TwoColLayout imgKey="barcas">
+              <SectionHeader label="Para compartilhar com todo mundo!" title="BARCAS" />
+              <div className="divide-y divide-border">
+                {BARCAS.map((item) => <ListItem key={item.name} {...item} />)}
+              </div>
+              <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer"
+                className="mt-8 flex items-center justify-center gap-2 w-full py-3 bg-primary text-primary-foreground text-xs tracking-widest uppercase font-bold hover:bg-red-700 transition-colors">
+                <ShoppingBag size={14} /> Pedir Barca
+              </a>
+            </TwoColLayout>
+          )}
+
+          {/* COMBINADOS */}
           {activeTab === "combinados" && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 bg-border">
-              <div className="bg-background p-8 lg:p-12">
-                <SectionHeader label="A melhor escolha para compartilhar!" title="COMBINADOS" />
-                <div className="divide-y divide-border">
-                  {COMBINADOS.map((item) => (
-                    <ListItem key={item.name} name={item.name} desc={item.desc} price={item.price} />
-                  ))}
+            <TwoColLayout imgKey="combinados">
+              <SectionHeader label="A melhor escolha para compartilhar!" title="COMBINADOS" />
+              <div className="divide-y divide-border">
+                {COMBINADOS.map((item) => <ListItem key={item.name} {...item} />)}
+              </div>
+              <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer"
+                className="mt-8 flex items-center justify-center gap-2 w-full py-3 bg-primary text-primary-foreground text-xs tracking-widest uppercase font-bold hover:bg-red-700 transition-colors">
+                <ShoppingBag size={14} /> Pedir Combinado
+              </a>
+            </TwoColLayout>
+          )}
+
+          {/* PROMOÇÕES */}
+          {activeTab === "promocoes" && (
+            <div className="max-w-3xl mx-auto bg-background border border-primary/30 p-8 lg:p-12">
+              <div className="flex items-center gap-3 mb-8">
+                <Tag size={20} className="text-primary" />
+                <div>
+                  <p className="text-primary text-[10px] tracking-[0.4em] uppercase mb-1">Aproveite!</p>
+                  <h3 className="text-3xl font-black text-foreground" style={{ fontFamily: "'Cinzel', serif" }}>PROMOÇÕES</h3>
                 </div>
-                <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer"
-                  className="mt-8 flex items-center justify-center gap-2 w-full py-3 bg-primary text-primary-foreground text-xs tracking-widest uppercase font-bold hover:bg-red-700 transition-colors">
-                  <ShoppingBag size={14} /> Pedir Combinado
-                </a>
               </div>
-              <div className="bg-card hidden lg:block overflow-hidden">
-                <ImageWithFallback src={SECTION_IMGS.combinados} alt="Combinado Esthan Sushi"
-                  className="w-full h-full object-cover" />
+              <div className="divide-y divide-border">
+                {PROMOCOES.map((item) => <ListItem key={item.name} {...item} />)}
               </div>
+              <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer"
+                className="mt-8 flex items-center justify-center gap-2 w-full py-3 bg-primary text-primary-foreground text-xs tracking-widest uppercase font-bold hover:bg-red-700 transition-colors">
+                <ShoppingBag size={14} /> Pedir com Promoção
+              </a>
             </div>
           )}
 
-          {/* ── TEMAKIS ── */}
+          {/* TEMAKIS */}
           {activeTab === "temakis" && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 bg-border">
-              <div className="bg-card hidden lg:block overflow-hidden">
-                <ImageWithFallback src={SECTION_IMGS.temakis} alt="Temaki Esthan Sushi"
-                  className="w-full h-full object-cover" />
+            <TwoColLayout imgKey="barcas">
+              <SectionHeader label="Generosos e irresistíveis!" title="TEMAKIS" />
+              <div className="divide-y divide-border">
+                {TEMAKIS.map((item) => <ListItem key={item.name} {...item} />)}
               </div>
-              <div className="bg-background p-8 lg:p-12">
-                <SectionHeader label="Generosos e irresistíveis!" title="TEMAKIS" />
-                <div className="divide-y divide-border">
-                  {TEMAKIS.map((item) => (
-                    <ListItem key={item.name} name={item.name} price={item.price} />
-                  ))}
-                </div>
-                <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer"
-                  className="mt-8 flex items-center justify-center gap-2 w-full py-3 bg-primary text-primary-foreground text-xs tracking-widest uppercase font-bold hover:bg-red-700 transition-colors">
-                  <ShoppingBag size={14} /> Pedir Temaki
-                </a>
-              </div>
-            </div>
+              <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer"
+                className="mt-8 flex items-center justify-center gap-2 w-full py-3 bg-primary text-primary-foreground text-xs tracking-widest uppercase font-bold hover:bg-red-700 transition-colors">
+                <ShoppingBag size={14} /> Pedir Temaki
+              </a>
+            </TwoColLayout>
           )}
 
-          {/* ── HOT ROLLS ── */}
+          {/* HOT ROLLS */}
           {activeTab === "hotrolls" && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 bg-border">
-              <div className="bg-background p-8 lg:p-12">
-                <SectionHeader label="Crocantes por fora, cremosos por dentro!" title="HOT ROLLS"
-                  sub="" />
-                <div className="flex items-center gap-2 mb-6 text-primary text-xs font-semibold">
-                  <Flame size={14} /> Crocantes por fora, cremosos por dentro!
-                </div>
-                <div className="divide-y divide-border">
-                  {HOT_ROLLS.map((item) => (
-                    <ListItem key={item.name} name={item.name} desc={item.desc} qty={item.qty} price={item.price} />
-                  ))}
-                </div>
-                <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer"
-                  className="mt-8 flex items-center justify-center gap-2 w-full py-3 bg-primary text-primary-foreground text-xs tracking-widest uppercase font-bold hover:bg-red-700 transition-colors">
-                  <ShoppingBag size={14} /> Pedir Hot Roll
-                </a>
+            <TwoColLayout imgKey="hotrolls">
+              <SectionHeader label="Crocantes por fora, cremosos por dentro!" title="HOT ROLLS" />
+              <div className="flex items-center gap-2 mb-5 text-primary text-xs font-semibold">
+                <Flame size={14} /> Todos grelhados na hora
               </div>
-              <div className="bg-card hidden lg:block overflow-hidden">
-                <ImageWithFallback src={SECTION_IMGS.hotrolls} alt="Hot Roll Esthan Sushi"
-                  className="w-full h-full object-cover" />
+              <div className="divide-y divide-border">
+                {HOT_ROLLS.map((item) => <ListItem key={item.name} {...item} />)}
               </div>
-            </div>
+              <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer"
+                className="mt-8 flex items-center justify-center gap-2 w-full py-3 bg-primary text-primary-foreground text-xs tracking-widest uppercase font-bold hover:bg-red-700 transition-colors">
+                <ShoppingBag size={14} /> Pedir Hot Roll
+              </a>
+            </TwoColLayout>
           )}
 
-          {/* ── URAMAKIS ── */}
+          {/* URAMAKIS */}
           {activeTab === "uramakis" && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 bg-border">
-              <div className="bg-card hidden lg:block overflow-hidden">
-                <ImageWithFallback src={SECTION_IMGS.uramakis} alt="Uramaki Esthan Sushi"
-                  className="w-full h-full object-cover" />
-              </div>
-              <div className="bg-background p-8 lg:p-12">
-                <SectionHeader label="Sabor e sofisticação em cada detalhe!" title="URAMAKIS" />
-                <div className="divide-y divide-border">
-                  {URAMAKIS.map((item) => (
-                    <ListItem key={item.name} name={item.name} desc={item.desc} qty={item.qty} price={item.price} />
-                  ))}
-                </div>
-                <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer"
-                  className="mt-8 flex items-center justify-center gap-2 w-full py-3 bg-primary text-primary-foreground text-xs tracking-widest uppercase font-bold hover:bg-red-700 transition-colors">
-                  <ShoppingBag size={14} /> Pedir Uramaki
-                </a>
-              </div>
-            </div>
-          )}
-
-          {/* ── HOSSOMAKIS ── */}
-          {activeTab === "hossomakis" && (
-            <div className="max-w-2xl mx-auto bg-background border border-border p-8 lg:p-12">
-              <SectionHeader label="Simples e deliciosos" title="HOSSOMAKIS" />
+            <TwoColLayout imgKey="uramakis">
+              <SectionHeader label="Sabor e sofisticação em cada detalhe!" title="URAMAKIS" />
               <div className="divide-y divide-border">
-                {HOSSOMAKIS.map((item) => (
-                  <ListItem key={item.name} name={item.name} qty={item.qty} price={item.price} />
-                ))}
+                {URAMAKIS.map((item) => <ListItem key={item.name} {...item} />)}
               </div>
               <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer"
                 className="mt-8 flex items-center justify-center gap-2 w-full py-3 bg-primary text-primary-foreground text-xs tracking-widest uppercase font-bold hover:bg-red-700 transition-colors">
-                <ShoppingBag size={14} /> Pedir Hossomaki
+                <ShoppingBag size={14} /> Pedir Uramaki
               </a>
-            </div>
+            </TwoColLayout>
           )}
 
-          {/* ── SASHIMIS ── */}
-          {activeTab === "sashimis" && (
+          {/* OUTROS */}
+          {activeTab === "outros" && (
             <div className="max-w-2xl mx-auto bg-background border border-border p-8 lg:p-12">
-              <SectionHeader label="Frescor em cada fatia!" title="SASHIMIS" />
+              <SectionHeader label="Hossomakis, Joy, Niguiri e Sashimi" title="OUTROS" />
               <div className="divide-y divide-border">
-                {SASHIMIS.map((item) => (
-                  <ListItem key={item.name} name={item.name} qty={item.qty} price={item.price} />
-                ))}
+                {HOSSOMAKIS_OUTROS.map((item) => <ListItem key={item.name} {...item} />)}
               </div>
               <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer"
                 className="mt-8 flex items-center justify-center gap-2 w-full py-3 bg-primary text-primary-foreground text-xs tracking-widest uppercase font-bold hover:bg-red-700 transition-colors">
-                <ShoppingBag size={14} /> Pedir Sashimi
-              </a>
-            </div>
-          )}
-
-          {/* ── BEBIDAS ── */}
-          {activeTab === "bebidas" && (
-            <div className="max-w-2xl mx-auto bg-background border border-border p-8 lg:p-12">
-              <SectionHeader label="Para acompanhar" title="BEBIDAS" />
-              <div className="divide-y divide-border">
-                {BEBIDAS.map((item) => (
-                  <ListItem key={item.name} name={item.name} price={item.price} />
-                ))}
-              </div>
-              <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer"
-                className="mt-8 flex items-center justify-center gap-2 w-full py-3 bg-primary text-primary-foreground text-xs tracking-widest uppercase font-bold hover:bg-red-700 transition-colors">
-                <ShoppingBag size={14} /> Incluir Bebida no Pedido
+                <ShoppingBag size={14} /> Pedir
               </a>
             </div>
           )}
@@ -401,18 +409,14 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <div className="relative">
             <div className="aspect-square overflow-hidden bg-secondary">
-              <ImageWithFallback
-                src="https://images.unsplash.com/photo-1709984110217-57d7d18e5299?w=800&h=800&fit=crop&auto=format"
-                alt="Sushi fresco preparado por Esthan Sushi"
-                className="w-full h-full object-cover"
-              />
+              <ImageWithFallback src="https://images.unsplash.com/photo-1709984110217-57d7d18e5299?w=800&h=800&fit=crop&auto=format"
+                alt="Sushi fresco preparado por Esthan Sushi" className="w-full h-full object-cover" />
             </div>
             <div className="absolute -bottom-6 -right-6 w-40 h-40 bg-primary flex-col items-center justify-center text-center p-4 hidden lg:flex">
               <span className="text-3xl font-black text-primary-foreground" style={{ fontFamily: "'Cinzel', serif" }}>5+</span>
               <span className="text-primary-foreground text-xs tracking-widest uppercase mt-1">Anos de sabor</span>
             </div>
           </div>
-
           <div>
             <p className="text-primary text-xs tracking-[0.4em] uppercase mb-4">Nossa História</p>
             <h2 className="text-4xl md:text-5xl font-black text-foreground mb-6 leading-tight" style={{ fontFamily: "'Cinzel', serif" }}>
@@ -420,7 +424,7 @@ export default function App() {
             </h2>
             <div className="space-y-4 text-muted-foreground leading-relaxed">
               <p>Peixes selecionados, sempre frescos e de qualidade. Cada roll é preparado na hora com muito cuidado, para que seu pedido chegue quente e com agilidade.</p>
-              <p>Trabalhamos exclusivamente por delivery para que você aproveite a mesma qualidade no conforto da sua casa. Rápido, fresco e com o sabor que conecta.</p>
+              <p>Trabalhamos exclusivamente por delivery para que você aproveite a mesma qualidade no conforto da sua casa.</p>
             </div>
             <div className="mt-10 grid grid-cols-3 gap-4 border-t border-border pt-8">
               {[
@@ -510,10 +514,7 @@ export default function App() {
               ))}
             </div>
             <div className="flex gap-4">
-              {[
-                { icon: <Instagram size={18} />, label: "Instagram" },
-                { icon: <Facebook size={18} />, label: "Facebook" },
-              ].map((s) => (
+              {[{ icon: <Instagram size={18} />, label: "Instagram" }, { icon: <Facebook size={18} />, label: "Facebook" }].map((s) => (
                 <button key={s.label} aria-label={s.label}
                   className="w-10 h-10 border border-border text-muted-foreground hover:border-primary hover:text-primary transition-colors flex items-center justify-center">
                   {s.icon}
