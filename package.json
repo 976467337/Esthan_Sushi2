@@ -2,6 +2,7 @@
   "name": "@figma/my-mak",
   "private": true,
   "version": "0.0.1",
+  "author": "Biagqr",
   "type": "module",
   "scripts": {
     "build": "vite build",
