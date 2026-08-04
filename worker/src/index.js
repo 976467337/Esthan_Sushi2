@@ -1,6 +1,6 @@
 const ALLOWED_ORIGINS = [
-  'https://esthan-sushi.com.br',
-  'https://www.esthan-sushi.com.br',
+  'https://esthansushi.com.br',
+  'https://www.esthansushi.com.br',
   'http://localhost:5173',
 ];
 
@@ -66,6 +66,16 @@ export default {
 
     // Visitor submits a testimonial -> stored as pending, returns an approval link
     if (url.pathname === '/submit' && request.method === 'POST') {
+      // CF-Connecting-IP vem do edge da Cloudflare (conexão TCP real), não é um header
+      // que o cliente consegue forjar como faria com X-Forwarded-For.
+      const ip = request.headers.get('CF-Connecting-IP') || '';
+      if (ip) {
+        const alreadySent = await env.TESTIMONIALS.get(`ip:${ip}`);
+        if (alreadySent) {
+          return json(cors, { error: 'already_submitted' }, 429);
+        }
+      }
+
       let body;
       try {
         body = await request.json();
@@ -95,6 +105,11 @@ export default {
       await env.TESTIMONIALS.put(`pending:${id}`, JSON.stringify(record), {
         expirationTtl: 60 * 60 * 24 * 30, // pending links expire after 30 days if never approved
       });
+
+      // Trava o IP para não permitir um novo envio (mesmo antes da aprovação do dono).
+      if (ip) {
+        await env.TESTIMONIALS.put(`ip:${ip}`, id);
+      }
 
       const approveUrl = `${url.origin}/approve?id=${id}`;
       return new Response(JSON.stringify({ id, approveUrl }), {
@@ -135,13 +150,83 @@ export default {
       });
     }
 
+    // Cliente escolheu "pagar agora" no site -> o Payment Brick do Mercado Pago manda o formData
+    // pra cá, a gente completa com nossos dados (descrição, referência do pedido, webhook) e chama
+    // a API da Mercado Pago com o Access Token secreto (nunca exposto no navegador).
+    if (url.pathname === '/payment/process' && request.method === 'POST') {
+      if (!env.MP_ACCESS_TOKEN) {
+        return json(cors, { error: 'payment_not_configured' }, 503);
+      }
+
+      let body;
+      try {
+        body = await request.json();
+      } catch {
+        return json(cors, { error: 'invalid_json' }, 400);
+      }
+
+      const mpResp = await fetch('https://api.mercadopago.com/v1/payments', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${env.MP_ACCESS_TOKEN}`,
+          'Content-Type': 'application/json',
+          'X-Idempotency-Key': crypto.randomUUID(),
+        },
+        body: JSON.stringify({
+          ...body,
+          description: clip(body.description, 200) || 'Pedido Esthan Sushi',
+          external_reference: clip(body.external_reference, 100),
+          notification_url: `${url.origin}/payment/webhook`,
+        }),
+      });
+
+      const data = await mpResp.json();
+      if (!mpResp.ok) {
+        return json(cors, { error: 'mp_error', detail: data }, mpResp.status);
+      }
+
+      const txData = data.point_of_interaction?.transaction_data;
+      return json(cors, {
+        id: data.id,
+        status: data.status,
+        status_detail: data.status_detail,
+        qrCode: txData?.qr_code,
+        qrCodeBase64: txData?.qr_code_base64,
+      });
+    }
+
+    // Polling do front-end enquanto um Pix está pendente (aguardando o cliente escanear/pagar)
+    if (url.pathname === '/payment/status' && request.method === 'GET') {
+      if (!env.MP_ACCESS_TOKEN) {
+        return json(cors, { error: 'payment_not_configured' }, 503);
+      }
+
+      const id = clip(url.searchParams.get('id'), 60);
+      if (!id) return json(cors, { error: 'missing_id' }, 400);
+
+      const mpResp = await fetch(`https://api.mercadopago.com/v1/payments/${encodeURIComponent(id)}`, {
+        headers: { Authorization: `Bearer ${env.MP_ACCESS_TOKEN}` },
+      });
+      const data = await mpResp.json();
+      if (!mpResp.ok) return json(cors, { error: 'mp_error', detail: data }, mpResp.status);
+
+      return json(cors, { status: data.status, status_detail: data.status_detail });
+    }
+
+    // Webhook de notificação da Mercado Pago (opcional — configurar a URL no painel deles depois
+    // que a conta estiver pronta). Por enquanto só confirma recebimento; a confirmação real do
+    // pagamento no site acontece por polling em /payment/status.
+    if (url.pathname === '/payment/webhook' && request.method === 'POST') {
+      return new Response('ok', { status: 200 });
+    }
+
     // Valida o endereço digitado pelo cliente (proxy pro Nominatim/OSM — sem CORS liberado pra chamar direto do navegador)
     if (url.pathname === '/geocode' && request.method === 'GET') {
       const address = clip(url.searchParams.get('address'), 200).trim();
       if (!address) return json(cors, { error: 'missing_address' }, 400);
 
       const nomUrl = `https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=br&q=${encodeURIComponent(address)}`;
-      const resp = await fetch(nomUrl, { headers: { 'User-Agent': 'EsthanSushiSite/1.0 (contato via esthan-sushi.com.br)' } });
+      const resp = await fetch(nomUrl, { headers: { 'User-Agent': 'EsthanSushiSite/1.0 (contato via esthansushi.com.br)' } });
       const results = await resp.json();
 
       if (!results.length) return json(cors, { found: false });

@@ -4,7 +4,7 @@ import { Menu, X, Phone, Clock, ChevronDown, Bike, ShoppingBag, Star, MapPin, Fl
 import { ImageWithFallback } from "@/app/components/figma/ImageWithFallback";
 import { OrderModal } from "@/app/components/OrderModal";
 import { CartDrawer } from "@/app/components/CartDrawer";
-import { buildOrderMessage, type CartLine, type DeliveryMode } from "@/app/cart-data";
+import { buildOrderMessage, type CartLine, type DeliveryMode, type PaymentInfo } from "@/app/cart-data";
 import logoFull from "@/imports/logo-transparent.png";
 import logoIcon from "@/imports/logo-mark.png";
 
@@ -167,8 +167,15 @@ export default function App() {
     setCart((prev) => prev.map((l) => (l.id === id ? { ...l, qty } : l)));
   const removeFromCart = (id: string) => setCart((prev) => prev.filter((l) => l.id !== id));
 
-  const checkoutViaWhatsApp = (customerName: string, deliveryMode: DeliveryMode, address: string, etaMinutes?: number, scheduledFor?: string) => {
-    const text = buildOrderMessage(cart, customerName, deliveryMode, address, etaMinutes, scheduledFor);
+  const checkoutViaWhatsApp = (
+    customerName: string,
+    deliveryMode: DeliveryMode,
+    address: string,
+    etaMinutes?: number,
+    scheduledFor?: string,
+    paymentInfo?: PaymentInfo
+  ) => {
+    const text = buildOrderMessage(cart, customerName, deliveryMode, address, etaMinutes, scheduledFor, paymentInfo);
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`, "_blank");
     setCart([]);
   };
@@ -178,6 +185,7 @@ export default function App() {
   >([]);
   const [showTestimonialForm, setShowTestimonialForm] = useState(false);
   const [testimonialSent, setTestimonialSent] = useState(false);
+  const [testimonialBlocked, setTestimonialBlocked] = useState(false);
   const [depNome, setDepNome] = useState("");
   const [depItem, setDepItem] = useState("");
   const [depNota, setDepNota] = useState(5);
@@ -205,6 +213,13 @@ export default function App() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ nome: depNome, item: depItem, nota: depNota, texto: depTexto }),
       });
+
+      // já existe um depoimento enviado a partir deste IP -> bloqueia sem abrir o WhatsApp
+      if (resp.status === 429) {
+        setTestimonialBlocked(true);
+        return;
+      }
+
       const data = await resp.json();
       approveUrl = data.approveUrl || "";
     } catch {
@@ -548,14 +563,20 @@ export default function App() {
           </div>
 
           <div className="mt-14 max-w-xl mx-auto text-center">
-            {!showTestimonialForm && !testimonialSent && (
+            {!showTestimonialForm && !testimonialSent && !testimonialBlocked && (
               <button onClick={() => setShowTestimonialForm(true)}
                 className="px-6 py-3 border border-primary/40 text-primary text-xs tracking-widest uppercase font-semibold hover:bg-primary/10 transition-colors">
                 Enviar seu depoimento
               </button>
             )}
 
-            {showTestimonialForm && !testimonialSent && (
+            {testimonialBlocked && (
+              <p className="text-muted-foreground text-sm leading-relaxed border border-border p-6">
+                Já identificamos um depoimento enviado a partir deste endereço. Cada cliente pode enviar apenas uma avaliação.
+              </p>
+            )}
+
+            {showTestimonialForm && !testimonialSent && !testimonialBlocked && (
               <form onSubmit={sendTestimonialToWhatsApp} className="flex flex-col gap-4 text-left border border-border p-6 md:p-8">
                 <div>
                   <label className="text-muted-foreground text-xs tracking-widest uppercase mb-2 block">Nome</label>

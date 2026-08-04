@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { X, Minus, Plus, Trash2, ShoppingBag, Loader2, CheckCircle2, AlertCircle, ArrowLeft, Heart, Clock } from "lucide-react";
-import { cartTotal, formatPrice, lineTotal, DELIVERY_FEE, type CartLine, type DeliveryMode } from "@/app/cart-data";
+import { cartTotal, formatPrice, lineTotal, DELIVERY_FEE, type CartLine, type DeliveryMode, type PaymentInfo } from "@/app/cart-data";
 import { geocodeAddress, estimateDelivery, lookupCep, RESTAURANT_ADDRESS, type CepResult } from "@/app/delivery";
 import { isWithinBusinessHours, nextOpeningLabel } from "@/app/business-hours";
+import { isPaymentConfigured } from "@/app/payments";
+import { PaymentStep } from "@/app/components/PaymentStep";
 
 type Status = "idle" | "checking" | "error" | "confirmed";
 type CepStatus = "idle" | "checking" | "error" | "found";
@@ -17,10 +19,17 @@ export function CartDrawer({
   cart: CartLine[];
   onUpdateQty: (id: string, qty: number) => void;
   onRemove: (id: string) => void;
-  onCheckout: (customerName: string, deliveryMode: DeliveryMode, address: string, etaMinutes?: number, scheduledFor?: string) => void;
+  onCheckout: (
+    customerName: string,
+    deliveryMode: DeliveryMode,
+    address: string,
+    etaMinutes?: number,
+    scheduledFor?: string,
+    paymentInfo?: PaymentInfo
+  ) => void;
 }) {
   const [open, setOpen] = useState(false);
-  const [step, setStep] = useState<"cart" | "closed" | "name" | "mode" | "address">("cart");
+  const [step, setStep] = useState<"cart" | "closed" | "name" | "mode" | "address" | "payment">("cart");
   const [scheduled, setScheduled] = useState(false);
   const [customerName, setCustomerName] = useState("");
   const [nameError, setNameError] = useState(false);
@@ -39,6 +48,7 @@ export function CartDrawer({
   const [errorMsg, setErrorMsg] = useState("");
   const [confirmedAddress, setConfirmedAddress] = useState("");
   const [etaMinutes, setEtaMinutes] = useState<number | undefined>(undefined);
+  const [orderId, setOrderId] = useState("");
 
   const itemCount = cart.reduce((sum, l) => sum + l.qty, 0);
 
@@ -170,12 +180,19 @@ export function CartDrawer({
     setScheduled(false);
   };
 
-  const handleCheckout = () => {
-    onCheckout(customerName.trim(), deliveryMode!, confirmedAddress, etaMinutes, scheduled ? nextOpeningLabel() : undefined);
+  const handleCheckout = (paymentInfo?: PaymentInfo) => {
+    onCheckout(customerName.trim(), deliveryMode!, confirmedAddress, etaMinutes, scheduled ? nextOpeningLabel() : undefined, paymentInfo);
     setCustomerName("");
     setScheduled(false);
     handleClose();
   };
+
+  const goToPaymentStep = () => {
+    setOrderId(crypto.randomUUID());
+    setStep("payment");
+  };
+
+  const orderGrandTotal = cartTotal(cart) + (deliveryMode === "delivery" ? DELIVERY_FEE : 0);
 
   return (
     <>
@@ -209,7 +226,7 @@ export function CartDrawer({
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
                   {step !== "cart" && (
-                    <button onClick={() => setStep(step === "address" ? "mode" : step === "mode" ? "name" : "cart")} className="text-muted-foreground hover:text-primary transition-colors">
+                    <button onClick={() => setStep(step === "payment" ? "address" : step === "address" ? "mode" : step === "mode" ? "name" : "cart")} className="text-muted-foreground hover:text-primary transition-colors">
                       <ArrowLeft size={20} />
                     </button>
                   )}
@@ -218,6 +235,7 @@ export function CartDrawer({
                       : step === "closed" ? "Estamos fechados"
                       : step === "name" ? "Quem está pedindo?"
                       : step === "mode" ? "Entrega ou retirada?"
+                      : step === "payment" ? "Pagamento"
                       : deliveryMode === "pickup" ? "Retirada no local" : "Endereço de entrega"}
                   </h3>
                 </div>
@@ -531,11 +549,34 @@ export function CartDrawer({
                       {deliveryMode === "pickup" ? "Trocar forma de recebimento" : "Corrigir endereço"}
                     </button>
 
-                    <button onClick={handleCheckout}
-                      className="mt-2 py-4 bg-primary text-primary-foreground font-bold tracking-widest uppercase text-sm hover:brightness-110 transition-all flex items-center justify-center gap-2">
-                      <ShoppingBag size={16} /> Confirmar pedido pelo WhatsApp
+                    {isPaymentConfigured() && (
+                      <button onClick={goToPaymentStep}
+                        className="mt-2 py-4 bg-primary text-primary-foreground font-bold tracking-widest uppercase text-sm hover:brightness-110 transition-all flex items-center justify-center gap-2">
+                        <ShoppingBag size={16} /> Pagar agora (Pix ou Cartão)
+                      </button>
+                    )}
+
+                    <button onClick={() => handleCheckout()}
+                      className={
+                        isPaymentConfigured()
+                          ? "py-3 border border-border text-foreground text-xs tracking-widest uppercase font-semibold hover:border-primary hover:text-primary transition-colors flex items-center justify-center gap-2"
+                          : "mt-2 py-4 bg-primary text-primary-foreground font-bold tracking-widest uppercase text-sm hover:brightness-110 transition-all flex items-center justify-center gap-2"
+                      }>
+                      <ShoppingBag size={16} />
+                      {isPaymentConfigured() ? "Pagar na entrega (dinheiro ou maquininha)" : "Confirmar pedido pelo WhatsApp"}
                     </button>
                   </div>
+                </div>
+              )}
+
+              {step === "payment" && (
+                <div className="flex-1 flex flex-col overflow-y-auto">
+                  <PaymentStep
+                    amount={orderGrandTotal}
+                    orderId={orderId}
+                    onApproved={(info) => handleCheckout(info)}
+                    onCancel={() => setStep("address")}
+                  />
                 </div>
               )}
             </motion.div>

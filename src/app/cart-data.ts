@@ -24,9 +24,19 @@ export const EXTRA_SAUCE_FEE = 2;
 // preços placeholder — ajuste os valores reais antes de publicar
 export const DRINKS = [
   { name: "Coca-Cola Lata 350ml", price: 6 },
+  { name: "Coca-Cola Zero Lata 350ml", price: 6 },
+  { name: "Coca-Cola Garrafa 600ml", price: 10 },
+  { name: "Coca-Cola Zero Garrafa 600ml", price: 10 },
   { name: "Guaraná Antarctica Lata 350ml", price: 6 },
+  { name: "Guaraná Antarctica Zero Lata 350ml", price: 6 },
+  { name: "Guaraná Antarctica Garrafa 600ml", price: 10 },
+  { name: "Guaraná Antarctica Zero Garrafa 600ml", price: 10 },
   { name: "Água Mineral 500ml", price: 4 },
   { name: "Suco de Uva 300ml", price: 7 },
+  { name: "Del Valle Uva Lata 290ml", price: 6 },
+  { name: "Del Valle Maçã Lata 290ml", price: 6 },
+  { name: "Del Valle Néctar de Manga Lata 290ml", price: 6 },
+  { name: "Del Valle Frutas Vermelhas Lata 290ml", price: 6 },
   { name: "Heineken Long Neck", price: 9 },
 ];
 
@@ -69,13 +79,16 @@ export function cartTotal(cart: CartLine[]): number {
   return cart.reduce((sum, line) => sum + lineTotal(line), 0);
 }
 
+export type PaymentInfo = { method: "pix" | "cartao"; id: string };
+
 export function buildOrderMessage(
   cart: CartLine[],
   customerName: string,
   deliveryMode: DeliveryMode,
   address?: string,
   etaMinutes?: number,
-  scheduledFor?: string
+  scheduledFor?: string,
+  paymentInfo?: PaymentInfo
 ): string {
   const lines = cart.map((line) => {
     const extrasText = line.extras && line.extras.length ? ` (${line.extras.join(", ")})` : "";
@@ -96,5 +109,9 @@ export function buildOrderMessage(
     ? `\n⏰ PEDIDO AGENDADO — fora do horário de funcionamento. Preparar a partir de ${scheduledFor}.\n`
     : "";
 
-  return `Novo pedido pelo site:\n${scheduledBlock}\nCliente: ${customerName}\n\n${lines.join("\n")}\n\nSubtotal: ${formatPrice(itemsTotal)}${modeBlock}\n\nTotal: ${formatPrice(grandTotal)}${etaBlock}`;
+  const paymentBlock = paymentInfo
+    ? `\n\n✅ Pagamento já realizado online via ${paymentInfo.method === "pix" ? "Pix" : "Cartão"} (ID ${paymentInfo.id})`
+    : "\n\nPagamento: na entrega (dinheiro ou cartão com o motoboy)";
+
+  return `Novo pedido pelo site:\n${scheduledBlock}\nCliente: ${customerName}\n\n${lines.join("\n")}\n\nSubtotal: ${formatPrice(itemsTotal)}${modeBlock}${paymentBlock}\n\nTotal: ${formatPrice(grandTotal)}${etaBlock}`;
 }
