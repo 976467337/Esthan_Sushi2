@@ -3,6 +3,7 @@ import { motion } from "motion/react";
 import { Menu, X, Phone, Clock, ChevronDown, Bike, ShoppingBag, Star, MapPin, Flame, Tag, Sailboat, UtensilsCrossed, Layers, IceCreamCone, Disc, Sparkles } from "lucide-react";
 import { ImageWithFallback } from "@/app/components/figma/ImageWithFallback";
 import { OrderModal } from "@/app/components/OrderModal";
+import { AllReviewsModal } from "@/app/components/AllReviewsModal";
 import { CartDrawer } from "@/app/components/CartDrawer";
 import { buildOrderMessage, type CartLine, type DeliveryMode, type PaymentInfo } from "@/app/cart-data";
 import logoFull from "@/imports/logo-transparent.png";
@@ -30,6 +31,10 @@ const REVIEWS = [
   { name: "Marcos S.", stars: 5, text: "Peço toda semana. O Combinado Casal é perfeito. Nunca chegou tarde nem em mal estado." },
   { name: "Valentina P.", stars: 5, text: "Primeira vez pedindo e fiquei encantado. Tudo fresquíssimo, sabores incríveis." },
 ];
+
+// Mostra só os mais recentes na página pra não poluir — o resto fica disponível
+// só pelo botão "Ver todos os depoimentos".
+const MAX_VISIBLE_REVIEWS = 9;
 
 // ─── HELPERS ──────────────────────────────────────────────────
 function SectionHeader({ label, title }: { label: string; title: string }) {
@@ -192,10 +197,14 @@ export default function App() {
     { id: "outros", label: "Outros", icon: <Sparkles size={12} /> },
   ];
 
+  // depoimentos aprovados são os mais recentes (o Worker já devolve os mais novos
+  // primeiro) -> mostramos eles antes dos depoimentos-base fixos.
   const allReviews = [
-    ...REVIEWS,
     ...approvedTestimonials.map((t) => ({ name: t.nome, stars: t.nota, text: t.texto })),
+    ...REVIEWS,
   ];
+  const visibleReviews = allReviews.slice(0, MAX_VISIBLE_REVIEWS);
+  const [showAllReviews, setShowAllReviews] = useState(false);
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden" style={{ fontFamily: "'Raleway', sans-serif" }}>
@@ -477,7 +486,7 @@ export default function App() {
             <h2 className="text-gradient text-4xl md:text-5xl font-black" style={{ fontFamily: "'Orbitron', sans-serif" }}>O QUE DIZEM</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-border">
-            {allReviews.map((r, idx) => (
+            {visibleReviews.map((r, idx) => (
               <motion.div
                 key={r.name + idx}
                 initial={{ opacity: 0, y: 20 }}
@@ -496,6 +505,15 @@ export default function App() {
               </motion.div>
             ))}
           </div>
+
+          {allReviews.length > MAX_VISIBLE_REVIEWS && (
+            <div className="mt-8 text-center">
+              <button onClick={() => setShowAllReviews(true)}
+                className="px-6 py-3 border border-border text-muted-foreground text-xs tracking-widest uppercase font-semibold hover:border-primary hover:text-primary transition-colors">
+                Ver todos os depoimentos ({allReviews.length})
+              </button>
+            </div>
+          )}
 
           <div className="mt-14 max-w-xl mx-auto text-center">
             {!showTestimonialForm && !testimonialSent && !testimonialBlocked && (
@@ -656,6 +674,7 @@ export default function App() {
       </footer>
 
       <OrderModal item={activeMenuItem} onClose={() => setActiveMenuItem(null)} onAddLine={addLineToCart} />
+      <AllReviewsModal open={showAllReviews} reviews={allReviews} onClose={() => setShowAllReviews(false)} />
       <CartDrawer cart={cart} onUpdateQty={updateCartQty} onRemove={removeFromCart} onCheckout={checkoutViaWhatsApp} />
     </div>
   );
