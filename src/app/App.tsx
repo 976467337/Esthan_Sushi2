@@ -638,7 +638,7 @@ export default function App() {
               { step: "01", title: "Monte seu carrinho", desc: "Clique nos pratos que quiser direto no cardápio do site e vá adicionando ao carrinho." },
               { step: "02", title: "Entrega ou retirada", desc: "Informe seu endereço (a gente calcula o tempo estimado na hora) ou escolha retirar no local." },
               { step: "03", title: "Pagamento e envio", desc: "Escolha como vai pagar na entrega (dinheiro, crédito, débito, VR/voucher ou Pix) e envie — a mensagem já sai pronta no WhatsApp." },
-              { step: "04", title: "Aproveite!", desc: "Seu pedido chega em média em 45 minutos, fresco e pronto para comer." },
+              { step: "04", title: "Aproveite!", desc: "Aguarde em média 45 minutos e é só se deliciar com os nossos pratos, preparados com todo carinho para você!" },
             ].map((s) => (
               <div key={s.step} className="flex gap-5 border border-border p-5 hover:border-primary/40 transition-colors">
                 <span className="text-3xl font-black text-primary/20 leading-none flex-shrink-0" style={{ fontFamily: "'Orbitron', sans-serif" }}>{s.step}</span>
