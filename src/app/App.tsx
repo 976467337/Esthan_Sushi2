@@ -5,7 +5,7 @@ import { ImageWithFallback } from "@/app/components/figma/ImageWithFallback";
 import { OrderModal } from "@/app/components/OrderModal";
 import { AllReviewsModal } from "@/app/components/AllReviewsModal";
 import { CartDrawer } from "@/app/components/CartDrawer";
-import { buildOrderMessage, type CartLine, type DeliveryMode, type PaymentInfo } from "@/app/cart-data";
+import { buildOrderMessage, type CartLine, type DeliveryMode, type PaymentInfo, type DeliveryPaymentMethod } from "@/app/cart-data";
 import logoFull from "@/imports/logo-transparent.png";
 import logoIcon from "@/imports/logo-mark.png";
 import { BARCAS, COMBINADOS, TEMAKIS, HOT_ROLLS, URAMAKIS, HOSSOMAKIS_OUTROS, DEFAULT_PROMO_CONFIG, ALL_MENU_ITEMS, type MenuItem } from "@/app/menu-data";
@@ -94,9 +94,10 @@ export default function App() {
     address: string,
     etaMinutes?: number,
     scheduledFor?: string,
-    paymentInfo?: PaymentInfo
+    paymentInfo?: PaymentInfo,
+    deliveryPaymentMethod?: DeliveryPaymentMethod
   ) => {
-    const text = buildOrderMessage(cart, customerName, deliveryMode, address, etaMinutes, scheduledFor, paymentInfo);
+    const text = buildOrderMessage(cart, customerName, deliveryMode, address, etaMinutes, scheduledFor, paymentInfo, deliveryPaymentMethod);
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`, "_blank");
     setCart([]);
   };

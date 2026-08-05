@@ -81,6 +81,11 @@ export function cartTotal(cart: CartLine[]): number {
 
 export type PaymentInfo = { method: "pix" | "cartao"; id: string };
 
+// Forma de pagamento na entrega — o cliente escolhe no final do formulário de
+// pedido, pra gente já saber se precisa levar maquininha (e de qual tipo) ou não.
+export const DELIVERY_PAYMENT_METHODS = ["Dinheiro", "Crédito", "Débito", "VR/Voucher", "Pix"] as const;
+export type DeliveryPaymentMethod = (typeof DELIVERY_PAYMENT_METHODS)[number];
+
 export function buildOrderMessage(
   cart: CartLine[],
   customerName: string,
@@ -88,7 +93,8 @@ export function buildOrderMessage(
   address?: string,
   etaMinutes?: number,
   scheduledFor?: string,
-  paymentInfo?: PaymentInfo
+  paymentInfo?: PaymentInfo,
+  deliveryPaymentMethod?: DeliveryPaymentMethod
 ): string {
   const lines = cart.map((line) => {
     const extrasText = line.extras && line.extras.length ? ` (${line.extras.join(", ")})` : "";
@@ -111,6 +117,8 @@ export function buildOrderMessage(
 
   const paymentBlock = paymentInfo
     ? `\n\n✅ Pagamento já realizado online via ${paymentInfo.method === "pix" ? "Pix" : "Cartão"} (ID ${paymentInfo.id})`
+    : deliveryPaymentMethod
+    ? `\n\nPagamento na entrega: ${deliveryPaymentMethod}`
     : "\n\nPagamento: na entrega (dinheiro ou cartão com o motoboy)";
 
   return `Novo pedido pelo site:\n${scheduledBlock}\nCliente: ${customerName}\n\n${lines.join("\n")}\n\nSubtotal: ${formatPrice(itemsTotal)}${modeBlock}${paymentBlock}\n\nTotal: ${formatPrice(grandTotal)}${etaBlock}`;

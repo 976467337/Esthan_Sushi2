@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { X, Minus, Plus, Trash2, ShoppingBag, Loader2, CheckCircle2, AlertCircle, ArrowLeft, Heart, Clock } from "lucide-react";
-import { cartTotal, formatPrice, lineTotal, DELIVERY_FEE, type CartLine, type DeliveryMode, type PaymentInfo } from "@/app/cart-data";
+import { cartTotal, formatPrice, lineTotal, DELIVERY_FEE, DELIVERY_PAYMENT_METHODS, type CartLine, type DeliveryMode, type PaymentInfo, type DeliveryPaymentMethod } from "@/app/cart-data";
 import { geocodeAddress, estimateDelivery, lookupCep, RESTAURANT_ADDRESS, FALLBACK_TOTAL_MINUTES, type CepResult } from "@/app/delivery";
 import { isWithinBusinessHours, nextOpeningLabel } from "@/app/business-hours";
 import { isPaymentConfigured } from "@/app/payments";
@@ -25,7 +25,8 @@ export function CartDrawer({
     address: string,
     etaMinutes?: number,
     scheduledFor?: string,
-    paymentInfo?: PaymentInfo
+    paymentInfo?: PaymentInfo,
+    deliveryPaymentMethod?: DeliveryPaymentMethod
   ) => void;
 }) {
   const [open, setOpen] = useState(false);
@@ -49,6 +50,8 @@ export function CartDrawer({
   const [confirmedAddress, setConfirmedAddress] = useState("");
   const [etaMinutes, setEtaMinutes] = useState<number | undefined>(undefined);
   const [orderId, setOrderId] = useState("");
+  const [deliveryPaymentMethod, setDeliveryPaymentMethod] = useState<DeliveryPaymentMethod | null>(null);
+  const [paymentMethodError, setPaymentMethodError] = useState(false);
 
   const itemCount = cart.reduce((sum, l) => sum + l.qty, 0);
 
@@ -66,6 +69,8 @@ export function CartDrawer({
     setErrorMsg("");
     setConfirmedAddress("");
     setEtaMinutes(undefined);
+    setDeliveryPaymentMethod(null);
+    setPaymentMethodError(false);
   };
 
   const goToNameStep = () => {
@@ -186,10 +191,26 @@ export function CartDrawer({
   };
 
   const handleCheckout = (paymentInfo?: PaymentInfo) => {
-    onCheckout(customerName.trim(), deliveryMode!, confirmedAddress, etaMinutes, scheduled ? nextOpeningLabel() : undefined, paymentInfo);
+    onCheckout(
+      customerName.trim(),
+      deliveryMode!,
+      confirmedAddress,
+      etaMinutes,
+      scheduled ? nextOpeningLabel() : undefined,
+      paymentInfo,
+      deliveryPaymentMethod ?? undefined
+    );
     setCustomerName("");
     setScheduled(false);
     handleClose();
+  };
+
+  const confirmDeliveryPaymentAndCheckout = () => {
+    if (!deliveryPaymentMethod) {
+      setPaymentMethodError(true);
+      return;
+    }
+    handleCheckout();
   };
 
   const goToPaymentStep = () => {
@@ -557,6 +578,28 @@ export function CartDrawer({
                       {deliveryMode === "pickup" ? "Trocar forma de recebimento" : "Corrigir endereço"}
                     </button>
 
+                    <div className="flex flex-col gap-2">
+                      <span className="text-muted-foreground text-xs tracking-widest uppercase">
+                        Forma de pagamento {deliveryMode === "pickup" ? "" : "(na entrega)"}
+                      </span>
+                      <div className="grid grid-cols-2 gap-2">
+                        {DELIVERY_PAYMENT_METHODS.map((method) => (
+                          <button key={method} type="button"
+                            onClick={() => { setDeliveryPaymentMethod(method); setPaymentMethodError(false); }}
+                            className={`py-2.5 px-3 border text-xs tracking-widest uppercase font-semibold transition-colors ${
+                              deliveryPaymentMethod === method
+                                ? "border-primary bg-primary/10 text-primary"
+                                : "border-border text-muted-foreground hover:border-primary/40"
+                            }`}>
+                            {method}
+                          </button>
+                        ))}
+                      </div>
+                      {paymentMethodError && (
+                        <p className="text-destructive text-xs">Escolha a forma de pagamento pra continuar.</p>
+                      )}
+                    </div>
+
                     {isPaymentConfigured() && (
                       <button onClick={goToPaymentStep}
                         className="mt-2 py-4 bg-primary text-primary-foreground font-bold tracking-widest uppercase text-sm hover:brightness-110 transition-all flex items-center justify-center gap-2">
@@ -564,7 +607,7 @@ export function CartDrawer({
                       </button>
                     )}
 
-                    <button onClick={() => handleCheckout()}
+                    <button onClick={confirmDeliveryPaymentAndCheckout}
                       className={
                         isPaymentConfigured()
                           ? "py-3 border border-border text-foreground text-xs tracking-widest uppercase font-semibold hover:border-primary hover:text-primary transition-colors flex items-center justify-center gap-2"
