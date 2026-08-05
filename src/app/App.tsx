@@ -136,17 +136,19 @@ export default function App() {
   }, []);
 
   // promoções configuradas pelo dono no painel /admin (nome do prato -> preço promocional).
-  // Enquanto ele nunca salvou nada (ou o Worker está fora do ar), mostra o pacote padrão.
+  // null = ele nunca salvou nada ainda (ou o Worker está fora do ar) -> mostra o pacote padrão.
+  // Um objeto (mesmo vazio, {}) = ele já salvou pelo menos uma vez -> respeita exatamente o
+  // que ele escolheu, incluindo a escolha de não deixar nenhum prato em promoção.
   const [promoConfig, setPromoConfig] = useState<Record<string, { active: boolean; price: string }> | null>(null);
 
   useEffect(() => {
     fetch(`${PROMOTIONS_API}/promotions`)
       .then((r) => r.json())
-      .then((cfg) => setPromoConfig(cfg && typeof cfg === "object" ? cfg : {}))
-      .catch(() => setPromoConfig({})); // Worker fora do ar -> cai no pacote padrão abaixo
+      .then((cfg) => setPromoConfig(cfg && typeof cfg === "object" ? cfg : null))
+      .catch(() => {}); // Worker fora do ar -> mantém null, cai no pacote padrão abaixo
   }, []);
 
-  const activePromoConfig = promoConfig && Object.keys(promoConfig).length > 0 ? promoConfig : DEFAULT_PROMO_CONFIG;
+  const activePromoConfig = promoConfig ?? DEFAULT_PROMO_CONFIG;
 
   const PROMOCOES: MenuItem[] = ALL_MENU_ITEMS
     .filter((item) => activePromoConfig[item.name]?.active)
@@ -356,7 +358,7 @@ export default function App() {
                 { title: "Hot Rolls", items: HOT_ROLLS },
                 { title: "Uramakis", items: URAMAKIS },
                 { title: "Outros", items: HOSSOMAKIS_OUTROS },
-              ].map((section) => (
+              ].filter((section) => section.items.length > 0).map((section) => (
                 <div key={section.title}>
                   <h3 className="text-gradient text-2xl md:text-3xl font-black mb-4" style={{ fontFamily: "'Orbitron', sans-serif" }}>
                     {section.title}
@@ -399,9 +401,15 @@ export default function App() {
                   <h3 className="text-gradient text-3xl font-black" style={{ fontFamily: "'Orbitron', sans-serif" }}>PROMOÇÕES</h3>
                 </div>
               </div>
-              <div className="divide-y divide-border">
-                {PROMOCOES.map((item) => <ListItem key={item.name} {...item} onSelect={() => setActiveMenuItem(item)} />)}
-              </div>
+              {PROMOCOES.length > 0 ? (
+                <div className="divide-y divide-border">
+                  {PROMOCOES.map((item) => <ListItem key={item.name} {...item} onSelect={() => setActiveMenuItem(item)} />)}
+                </div>
+              ) : (
+                <p className="text-muted-foreground text-sm text-center py-10 border border-border">
+                  Nenhuma promoção ativa no momento — mas dá uma olhada no resto do cardápio!
+                </p>
+              )}
             </div>
           )}
 

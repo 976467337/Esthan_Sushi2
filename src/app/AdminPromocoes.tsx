@@ -26,11 +26,13 @@ export default function AdminPromocoes() {
     try {
       const resp = await fetch(`${API}/promotions`);
       const cfg = await resp.json();
-      // Se ninguém nunca salvou nada pelo painel ainda, o site público está mostrando
-      // o pacote padrão (DEFAULT_PROMO_CONFIG) — abrir o painel já com ele marcado
-      // é o que deixa "remover o que já estava em promoção" funcionar de primeira,
-      // em vez do dono ver tudo desmarcado e achar que nada está em promoção.
-      if (cfg && typeof cfg === "object" && Object.keys(cfg).length > 0) {
+      // O Worker devolve null só quando ninguém nunca salvou nada pelo painel ainda —
+      // nesse caso o site público está mostrando o pacote padrão (DEFAULT_PROMO_CONFIG),
+      // então abrimos o painel já com ele marcado (senão o dono veria tudo desmarcado e
+      // acharia que nada está em promoção). Se já existe um objeto salvo — mesmo vazio,
+      // {} — é porque o dono já mexeu no painel antes, inclusive pra tirar tudo de
+      // propósito, e isso precisa ser respeitado em vez de voltar pro padrão sozinho.
+      if (cfg && typeof cfg === "object") {
         setPromoState(cfg);
       } else {
         setPromoState(DEFAULT_PROMO_CONFIG);

@@ -184,7 +184,10 @@ export default {
     // preço — o dono edita essa lista pelo painel /admin do site, sem mexer em código.
     if (url.pathname === '/promotions' && request.method === 'GET') {
       const raw = await env.TESTIMONIALS.get('promotions_config');
-      return json(cors, raw ? JSON.parse(raw) : {});
+      // null explícito quando o dono nunca salvou nada (chave nem existe na KV) — diferente
+      // de '{}' quando ele já salvou e escolheu de propósito não ter nenhuma promoção ativa.
+      // O site usa essa diferença pra saber se cai no pacote padrão ou respeita a escolha dele.
+      return json(cors, raw ? JSON.parse(raw) : null);
     }
 
     // Painel /admin testa a senha antes de liberar a edição (não salva nada aqui).
