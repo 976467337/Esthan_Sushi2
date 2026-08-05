@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { X, Minus, Plus, Trash2, ShoppingBag, Loader2, CheckCircle2, AlertCircle, ArrowLeft, Heart, Clock } from "lucide-react";
 import { cartTotal, formatPrice, lineTotal, DELIVERY_FEE, type CartLine, type DeliveryMode, type PaymentInfo } from "@/app/cart-data";
-import { geocodeAddress, estimateDelivery, lookupCep, RESTAURANT_ADDRESS, type CepResult } from "@/app/delivery";
+import { geocodeAddress, estimateDelivery, lookupCep, RESTAURANT_ADDRESS, FALLBACK_TOTAL_MINUTES, type CepResult } from "@/app/delivery";
 import { isWithinBusinessHours, nextOpeningLabel } from "@/app/business-hours";
 import { isPaymentConfigured } from "@/app/payments";
 import { PaymentStep } from "@/app/components/PaymentStep";
@@ -128,9 +128,12 @@ export function CartDrawer({
     const searchAddress = `${cepData!.rua}, ${numero.trim()}, ${cepData!.bairro}, ${cepData!.cidade}, ${cepData!.uf}`;
 
     const geo = await geocodeAddress(searchAddress);
-    const eta = !scheduled && geo.found && geo.lat != null && geo.lon != null ? await estimateDelivery(geo.lat, geo.lon) : null;
+    const eta = geo.found && geo.lat != null && geo.lon != null ? await estimateDelivery(geo.lat, geo.lon) : null;
 
-    setEtaMinutes(eta?.totalMinutes);
+    // Sempre mostra um tempo aproximado pro cliente — se não deu pra calcular o
+    // trajeto de verdade (endereço não geocodificou, rota falhou), cai na média
+    // que já anunciamos no site em vez de deixar sem nenhuma estimativa.
+    setEtaMinutes(eta?.totalMinutes ?? FALLBACK_TOTAL_MINUTES);
     setConfirmedAddress(fullAddress);
     setStatus("confirmed");
   };
@@ -154,8 +157,10 @@ export function CartDrawer({
       return;
     }
 
-    const eta = scheduled ? null : await estimateDelivery(geo.lat, geo.lon);
-    setEtaMinutes(eta?.totalMinutes);
+    // Sempre mostra um tempo aproximado pro cliente — se o cálculo do trajeto falhar
+    // por algum motivo, cai na média que já anunciamos no site.
+    const eta = await estimateDelivery(geo.lat, geo.lon);
+    setEtaMinutes(eta?.totalMinutes ?? FALLBACK_TOTAL_MINUTES);
     setConfirmedAddress(fullAddress);
     setStatus("confirmed");
   };
@@ -511,23 +516,26 @@ export function CartDrawer({
                       </div>
                     </div>
 
-                    {scheduled ? (
+                    {scheduled && (
                       <div className="flex items-start gap-3 border border-primary/30 bg-primary/5 px-4 py-4">
                         <Clock size={20} className="text-primary flex-shrink-0 mt-0.5" />
                         <div>
                           <p className="text-foreground text-sm font-semibold">Pedido agendado</p>
-                          <p className="text-muted-foreground text-xs mt-1">Vamos preparar assim que abrirmos, {nextOpeningLabel()}.</p>
+                          <p className="text-muted-foreground text-xs mt-1">
+                            Vamos preparar assim que abrirmos, {nextOpeningLabel()}
+                            {deliveryMode === "delivery" && etaMinutes ? ` — a entrega leva em média mais ~${etaMinutes} min a partir daí.` : "."}
+                          </p>
                         </div>
                       </div>
-                    ) : deliveryMode === "delivery" && etaMinutes ? (
+                    )}
+
+                    {!scheduled && deliveryMode === "delivery" && etaMinutes && (
                       <div className="border border-border px-4 py-4">
                         <p className="text-muted-foreground text-xs tracking-widest uppercase mb-1">Tempo estimado de entrega</p>
                         <p className="text-primary text-2xl font-black" style={{ fontFamily: "'Orbitron', sans-serif" }}>~{etaMinutes} min</p>
                         <p className="text-muted-foreground text-xs mt-1">Já incluindo o preparo do pedido</p>
                       </div>
-                    ) : deliveryMode === "delivery" ? (
-                      <p className="text-muted-foreground text-xs">Endereço confirmado — o tempo estimado será combinado direto no WhatsApp.</p>
-                    ) : null}
+                    )}
 
                     <div className="border border-border px-4 py-4 flex flex-col gap-2">
                       <div className="flex items-center justify-between text-sm">

@@ -2,6 +2,11 @@ const API_BASE = "https://esthan-depoimentos.rieres.workers.dev";
 
 export const RESTAURANT_ADDRESS = "Rua Marina Lemos de Abreu, 68 - Jardim Centenário, São Paulo - SP";
 
+// Usado quando não dá pra calcular o trajeto de verdade (endereço não geocodificou,
+// ou o serviço de rota falhou) — mesma média que já anunciamos no site, pra sempre
+// mostrar um tempo aproximado ao cliente em vez de nada.
+export const FALLBACK_TOTAL_MINUTES = 45;
+
 export type GeocodeResult = { found: boolean; lat?: number; lon?: number; displayName?: string };
 export type EtaResult = { travelMinutes: number; prepMinutes: number; totalMinutes: number };
 
