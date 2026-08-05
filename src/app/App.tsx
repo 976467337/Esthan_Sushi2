@@ -291,7 +291,7 @@ export default function App() {
       <section className="py-10 border-y border-border bg-card">
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-border">
           {[
-            { icon: <Bike size={22} className="text-primary" />, title: "Entrega Rápida", desc: "45 minutos na sua porta" },
+            { icon: <Bike size={22} className="text-primary" />, title: "Entrega Rápida", desc: "Média de 45 minutos na sua porta" },
             { icon: <Clock size={22} className="text-primary" />, title: "Horário de Delivery", desc: "Segunda a Sábado · 19h30 às 23h30" },
             { icon: <MapPin size={22} className="text-primary" />, title: "Região de Entrega", desc: "Vila Nova Cachoeirinha e região" },
           ].map((info) => (
@@ -569,10 +569,11 @@ export default function App() {
         <div className="max-w-4xl mx-auto px-6 text-center relative z-10">
           <p className="text-white/80 text-xs tracking-[0.4em] uppercase mb-4 font-semibold">Delivery</p>
           <h2 className="text-4xl md:text-6xl font-black text-white mb-6 leading-tight [text-shadow:0_2px_16px_rgba(0,0,0,0.35)]" style={{ fontFamily: "'Orbitron', sans-serif" }}>
-            PEÇA AGORA,<br />COMA EM 45 MIN
+            PEÇA AGORA,<br />COMA EM ~45 MIN
           </h2>
           <p className="text-white/90 text-lg mb-10 font-light max-w-xl mx-auto">
-            Monte seu pedido no site e a gente prepara na hora. Sem aplicativo, sem taxa extra, direto com a gente.
+            Monte seu pedido no site e a gente prepara na hora. Tempo médio de entrega, pode variar conforme o
+            endereço e o movimento — sem aplicativo, sem taxa extra, direto com a gente.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button onClick={() => scrollTo("cardapio")}
@@ -618,7 +619,7 @@ export default function App() {
               { step: "01", title: "Escolha do cardápio", desc: "Selecione seus rolls favoritos e anote nome e quantidade." },
               { step: "02", title: "Mande no WhatsApp", desc: "Envie seu pedido com o endereço de entrega pelo WhatsApp." },
               { step: "03", title: "Confirme e pague", desc: "Confirmamos o total. Pagamento em dinheiro ou transferência na entrega." },
-              { step: "04", title: "Aproveite!", desc: "Seu pedido chega em 45 minutos, fresco e pronto para comer." },
+              { step: "04", title: "Aproveite!", desc: "Seu pedido chega em média em 45 minutos, fresco e pronto para comer." },
             ].map((s) => (
               <div key={s.step} className="flex gap-5 border border-border p-5 hover:border-primary/40 transition-colors">
                 <span className="text-3xl font-black text-primary/20 leading-none flex-shrink-0" style={{ fontFamily: "'Orbitron', sans-serif" }}>{s.step}</span>
