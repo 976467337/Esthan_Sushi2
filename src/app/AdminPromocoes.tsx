@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { Lock, Search, LogOut, UtensilsCrossed, Tag } from "lucide-react";
+import { Lock, Search, LogOut, UtensilsCrossed, Tag, ArrowLeft } from "lucide-react";
 import { ImageWithFallback } from "@/app/components/figma/ImageWithFallback";
-import { MENU_CATEGORIES } from "@/app/menu-data";
+import { MENU_CATEGORIES, DEFAULT_PROMO_CONFIG } from "@/app/menu-data";
 
 const API = "https://esthan-depoimentos.rieres.workers.dev";
 const PASSWORD_KEY = "esthan_admin_pw";
@@ -26,10 +26,19 @@ export default function AdminPromocoes() {
     try {
       const resp = await fetch(`${API}/promotions`);
       const cfg = await resp.json();
-      if (cfg && typeof cfg === "object") setPromoState(cfg);
+      // Se ninguém nunca salvou nada pelo painel ainda, o site público está mostrando
+      // o pacote padrão (DEFAULT_PROMO_CONFIG) — abrir o painel já com ele marcado
+      // é o que deixa "remover o que já estava em promoção" funcionar de primeira,
+      // em vez do dono ver tudo desmarcado e achar que nada está em promoção.
+      if (cfg && typeof cfg === "object" && Object.keys(cfg).length > 0) {
+        setPromoState(cfg);
+      } else {
+        setPromoState(DEFAULT_PROMO_CONFIG);
+      }
     } catch {
-      // não conseguiu carregar o que já está configurado — painel abre em branco,
-      // o dono ainda consegue marcar e salvar promoções normalmente
+      // não conseguiu carregar o que já está configurado — mostra o padrão como base,
+      // o dono ainda consegue marcar/desmarcar e salvar promoções normalmente
+      setPromoState(DEFAULT_PROMO_CONFIG);
     }
   }
 
@@ -122,15 +131,20 @@ export default function AdminPromocoes() {
 
   return (
     <div className="min-h-screen bg-background text-foreground" style={{ fontFamily: "'Raleway', sans-serif" }}>
-      <header className="border-b border-border px-6 py-5 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Tag size={18} className="text-primary" />
-          <h1 className="text-lg font-black tracking-widest" style={{ fontFamily: "'Orbitron', sans-serif" }}>
-            PAINEL DE <span className="text-primary">PROMOÇÕES</span>
-          </h1>
+      <header className="border-b border-border px-6 py-5 flex items-center justify-between gap-4">
+        <div className="flex items-center gap-4 min-w-0">
+          <a href="/" className="flex items-center gap-1.5 text-muted-foreground text-xs tracking-widest uppercase hover:text-primary transition-colors flex-shrink-0">
+            <ArrowLeft size={14} /> <span className="hidden sm:inline">Voltar ao site</span>
+          </a>
+          <div className="flex items-center gap-2 min-w-0">
+            <Tag size={18} className="text-primary flex-shrink-0" />
+            <h1 className="text-lg font-black tracking-widest truncate" style={{ fontFamily: "'Orbitron', sans-serif" }}>
+              PAINEL DE <span className="text-primary">PROMOÇÕES</span>
+            </h1>
+          </div>
         </div>
         {unlocked && (
-          <button onClick={logout} className="flex items-center gap-1.5 text-muted-foreground text-xs tracking-widest uppercase hover:text-primary transition-colors">
+          <button onClick={logout} className="flex items-center gap-1.5 text-muted-foreground text-xs tracking-widest uppercase hover:text-primary transition-colors flex-shrink-0">
             <LogOut size={14} /> Sair
           </button>
         )}
@@ -248,10 +262,16 @@ export default function AdminPromocoes() {
                 {saveStatus === "ok" && <span className="text-primary font-semibold"> · Salvo! Já está valendo no site.</span>}
                 {saveStatus === "error" && <span className="text-destructive font-semibold"> · Não consegui salvar, tenta de novo.</span>}
               </span>
-              <button onClick={handleSave} disabled={saving}
-                className="px-6 py-3 bg-primary text-primary-foreground text-xs tracking-widest uppercase font-bold hover:brightness-110 transition-all disabled:opacity-60 flex-shrink-0">
-                {saving ? "Salvando..." : "Salvar promoções"}
-              </button>
+              <div className="flex items-center gap-3 flex-shrink-0">
+                <button onClick={handleSave} disabled={saving}
+                  className="px-6 py-3 bg-primary text-primary-foreground text-xs tracking-widest uppercase font-bold hover:brightness-110 transition-all disabled:opacity-60">
+                  {saving ? "Salvando..." : "Salvar promoções"}
+                </button>
+                <a href="/"
+                  className="px-4 py-3 border border-border text-muted-foreground text-xs tracking-widest uppercase font-bold hover:text-primary hover:border-primary transition-colors">
+                  Voltar ao site
+                </a>
+              </div>
             </div>
           </div>
         </>

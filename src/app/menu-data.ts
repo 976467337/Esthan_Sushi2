@@ -102,18 +102,22 @@ export const HOSSOMAKIS_OUTROS: MenuItem[] = [
   { name: "Sashimi", desc: "20 unidades", price: "R$ 69,90", img: imgSashimi },
 ];
 
+export type PromoConfig = Record<string, { active: boolean; price: string }>;
+
 // Promoções padrão — usadas enquanto o dono nunca configurou nada pelo painel /admin,
 // ou se o Worker estiver fora do ar. Assim que ele salva pelo painel, isso é substituído
-// pelo que ele escolheu (ver PROMOTIONS_API em App.tsx).
-export const DEFAULT_PROMOCOES: MenuItem[] = [
-  { name: "Promoção Combinado Casal", desc: "02 Temaki Salmão Completo · 04 Filadélfia · 04 Uramaki Filadélfia", oldPrice: "R$ 74,90", price: "R$ 68,90", img: imgCombinadoCasal },
-  { name: "Promoção Combinado Casal Hot", desc: "02 Temaki Salmão Completo · 04 Filadélfia · 04 Uramaki Filadélfia", oldPrice: null, price: "R$ 69,90" },
-  { name: "Promoção Hot Roll Salmão", desc: "Arroz, salmão, cream cheese e cebolinha · 8 unidades", oldPrice: "R$ 29,90", price: "R$ 25,90", img: imgHotRollSalmao },
-  { name: "Promoção Mini Barca", desc: "05 Sashimis · 06 Uramaki Salmão · 06 Hossomaki Salmão", oldPrice: "R$ 59,90", price: "R$ 49,90", img: imgMiniBarcaSalmao },
-  { name: "Promoção Sushi Uramaki Skin", desc: "Arroz com gergilim, pele de salmão frita, cream cheese e cebolinha · 8 unidades", oldPrice: "R$ 22,90", price: "R$ 18,90" },
-  { name: "Promoção Temaki Hot", desc: "Salmão, cream cheese, cebolinha, arroz e panko", oldPrice: "R$ 31,90", price: "R$ 26,90", img: imgTemakiHot },
-  { name: "Temaki Hot + Hot (Promo)", desc: "01 Temaki Hot · 04 Hot Roll", oldPrice: null, price: "R$ 37,90" },
-];
+// pelo que ele escolheu (ver PROMOTIONS_API em App.tsx). Chaveado pelo nome exato do
+// prato-base (mesmo formato que o painel /admin salva no Worker) — assim o nome exibido
+// nunca carrega "Promoção"/"Promo" grudado, é sempre o nome limpo do prato.
+export const DEFAULT_PROMO_CONFIG: PromoConfig = {
+  "Combinado Casal": { active: true, price: "R$ 68,90" },
+  "Combinado Casal Hot": { active: true, price: "R$ 69,90" },
+  "Hot Roll Salmão": { active: true, price: "R$ 25,90" },
+  "Mini Barca Salmão": { active: true, price: "R$ 49,90" },
+  "Sushi Uramaki Skin": { active: true, price: "R$ 18,90" },
+  "Temaki Hot": { active: true, price: "R$ 26,90" },
+  "Temaki Hot + Hot": { active: true, price: "R$ 37,90" },
+};
 
 // Categorias que o painel /admin lista pro dono escolher o que entra em promoção.
 // (as "Promoções" em si não entram aqui — são geradas a partir destes pratos-base.)

@@ -7,7 +7,7 @@ import { CartDrawer } from "@/app/components/CartDrawer";
 import { buildOrderMessage, type CartLine, type DeliveryMode, type PaymentInfo } from "@/app/cart-data";
 import logoFull from "@/imports/logo-transparent.png";
 import logoIcon from "@/imports/logo-mark.png";
-import { BARCAS, COMBINADOS, TEMAKIS, HOT_ROLLS, URAMAKIS, HOSSOMAKIS_OUTROS, DEFAULT_PROMOCOES, ALL_MENU_ITEMS, type MenuItem } from "@/app/menu-data";
+import { BARCAS, COMBINADOS, TEMAKIS, HOT_ROLLS, URAMAKIS, HOSSOMAKIS_OUTROS, DEFAULT_PROMO_CONFIG, ALL_MENU_ITEMS, type MenuItem } from "@/app/menu-data";
 
 const WHATSAPP_NUMBER = "5511994597259";
 
@@ -20,7 +20,7 @@ const TESTIMONIAL_SENT_KEY = "esthan_depoimento_enviado";
 
 // promoções: o dono edita pelo painel /admin (sem mexer em código) -> Worker guarda
 // -> site público busca aqui a cada carregamento. Enquanto ele nunca salvou nada,
-// mostra o pacote de promoções padrão (DEFAULT_PROMOCOES) como estava até agora.
+// mostra o pacote de promoções padrão (DEFAULT_PROMO_CONFIG) como estava até agora.
 const PROMOTIONS_API = "https://esthan-depoimentos.rieres.workers.dev";
 
 const NAV_LINKS = ["Início", "Cardápio", "Sobre", "Pedido"];
@@ -131,18 +131,17 @@ export default function App() {
       .catch(() => setPromoConfig({})); // Worker fora do ar -> cai no pacote padrão abaixo
   }, []);
 
-  const PROMOCOES: MenuItem[] =
-    promoConfig && Object.keys(promoConfig).length > 0
-      ? ALL_MENU_ITEMS
-          .filter((item) => promoConfig[item.name]?.active)
-          .map((item) => ({
-            name: item.name,
-            desc: item.desc,
-            img: item.img,
-            oldPrice: item.price,
-            price: promoConfig[item.name].price || item.price,
-          }))
-      : DEFAULT_PROMOCOES;
+  const activePromoConfig = promoConfig && Object.keys(promoConfig).length > 0 ? promoConfig : DEFAULT_PROMO_CONFIG;
+
+  const PROMOCOES: MenuItem[] = ALL_MENU_ITEMS
+    .filter((item) => activePromoConfig[item.name]?.active)
+    .map((item) => ({
+      name: item.name,
+      desc: item.desc,
+      img: item.img,
+      oldPrice: item.price,
+      price: activePromoConfig[item.name].price || item.price,
+    }));
 
   async function sendTestimonialToWhatsApp(e: FormEvent) {
     e.preventDefault();
