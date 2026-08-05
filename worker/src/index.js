@@ -54,9 +54,10 @@ function json(cors, body, status = 200) {
 const RESTAURANT_ORIGIN = { lat: -23.4737, lon: -46.6695 };
 const PREP_MINUTES = 15;
 
-// WhatsApp do dono que recebe a notificação de novo depoimento (mesmo número usado
-// nos pedidos do site). Não é segredo — só a CALLMEBOT_APIKEY (wrangler secret) é.
-const OWNER_PHONE = '5511994597259';
+// WhatsApp que recebe a notificação de novo depoimento via CallMeBot — número
+// separado do que recebe os pedidos dos clientes (esse aqui só precisa ter feito
+// a autorização do CallMeBot). Não é segredo — só a CALLMEBOT_APIKEY (wrangler secret) é.
+const OWNER_PHONE = '5511946645976';
 
 // Avisa o dono no WhatsApp via CallMeBot assim que um depoimento é enviado.
 // Best-effort: se a CALLMEBOT_APIKEY não estiver configurada ou o CallMeBot falhar,
