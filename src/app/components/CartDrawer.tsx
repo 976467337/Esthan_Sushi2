@@ -329,7 +329,7 @@ export function CartDrawer({
                       No momento estamos fechados.
                     </p>
                     <p className="text-muted-foreground text-sm leading-relaxed">
-                      Funcionamos de segunda a sábado, das 19h30 às 23h30. Você pode voltar mais tarde,
+                      Funcionamos de segunda a sábado, das 19h30 às 23h. Você pode voltar mais tarde,
                       ou deixar seu pedido registrado agora e preparamos assim que abrirmos ({nextOpeningLabel()}).
                     </p>
 

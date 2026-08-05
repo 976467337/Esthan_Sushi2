@@ -1,7 +1,7 @@
 const OPEN_HOUR = 19;
 const OPEN_MINUTE = 30;
 const CLOSE_HOUR = 23;
-const CLOSE_MINUTE = 30;
+const CLOSE_MINUTE = 0;
 const CLOSED_WEEKDAY = 0; // domingo
 
 const WEEKDAY_NAMES = [

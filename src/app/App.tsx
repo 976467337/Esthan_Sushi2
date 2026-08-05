@@ -24,7 +24,15 @@ const TESTIMONIAL_SENT_KEY = "esthan_depoimento_enviado";
 // mostra o pacote de promoções padrão (DEFAULT_PROMO_CONFIG) como estava até agora.
 const PROMOTIONS_API = "https://esthan-depoimentos.rieres.workers.dev";
 
-const NAV_LINKS = ["Início", "Cardápio", "Sobre", "Pedido"];
+// id explícito em vez de derivar do texto — assim o texto do menu pode mudar
+// livremente sem quebrar o scroll até a seção (ex: "Cardápio" com acento não
+// batia com o id "cardapio" sem acento; ficava sem rolar até a seção certa).
+const NAV_LINKS = [
+  { label: "Início", id: "inicio" },
+  { label: "Cardápio", id: "cardapio" },
+  { label: "Sobre", id: "sobre" },
+  { label: "Como fazer seu pedido", id: "pedido" },
+];
 
 const REVIEWS = [
   { name: "Camila R.", stars: 5, text: "Delivery chegou rapidíssimo e o sushi estava impecável. A Barca Hot é incrível!" },
@@ -220,11 +228,11 @@ export default function App() {
             </span>
           </button>
 
-          <nav className="hidden md:flex items-center gap-8">
+          <nav className="hidden md:flex items-center gap-6 lg:gap-8">
             {NAV_LINKS.map((link) => (
-              <button key={link} onClick={() => scrollTo(link.toLowerCase().replace("í", "i"))}
-                className="text-sm tracking-widest uppercase text-muted-foreground hover:text-primary transition-colors font-medium">
-                {link}
+              <button key={link.id} onClick={() => scrollTo(link.id)}
+                className="text-sm tracking-widest uppercase text-muted-foreground hover:text-primary transition-colors font-medium whitespace-nowrap">
+                {link.label}
               </button>
             ))}
           </nav>
@@ -242,9 +250,9 @@ export default function App() {
         {navOpen && (
           <div className="md:hidden bg-card border-t border-border px-6 py-6 flex flex-col gap-4">
             {NAV_LINKS.map((link) => (
-              <button key={link} onClick={() => scrollTo(link.toLowerCase().replace("í", "i"))}
+              <button key={link.id} onClick={() => scrollTo(link.id)}
                 className="text-left text-sm tracking-widest uppercase text-muted-foreground hover:text-primary transition-colors">
-                {link}
+                {link.label}
               </button>
             ))}
             <button onClick={() => scrollTo("cardapio")}
@@ -280,7 +288,7 @@ export default function App() {
             Rolls artesanais frescos na sua porta.
           </p>
           <p className="text-muted-foreground text-sm max-w-sm leading-relaxed mb-10 font-light">
-            Segunda a Sábado · 19h30 às 23h30 · Vila Nova Cachoeirinha
+            Segunda a Sábado · 19h30 às 23h · Vila Nova Cachoeirinha
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4">
@@ -302,7 +310,7 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-border">
           {[
             { icon: <Bike size={22} className="text-primary" />, title: "Entrega Rápida", desc: "Média de 45 minutos na sua porta" },
-            { icon: <Clock size={22} className="text-primary" />, title: "Horário de Delivery", desc: "Segunda a Sábado · 19h30 às 23h30" },
+            { icon: <Clock size={22} className="text-primary" />, title: "Horário de Delivery", desc: "Segunda a Sábado · 19h30 às 23h" },
             { icon: <MapPin size={22} className="text-primary" />, title: "Região de Entrega", desc: "Vila Nova Cachoeirinha e região" },
           ].map((info) => (
             <div key={info.title} className="flex items-center gap-4 px-8 py-6">
@@ -618,7 +626,7 @@ export default function App() {
             <div className="space-y-5 mb-8">
               {[
                 { icon: <Phone size={18} className="text-primary" />, label: "WhatsApp", val: "(11) 99459-7259" },
-                { icon: <Clock size={18} className="text-primary" />, label: "Horário de delivery", val: "Segunda a Sábado · 19h30 às 23h30" },
+                { icon: <Clock size={18} className="text-primary" />, label: "Horário de delivery", val: "Segunda a Sábado · 19h30 às 23h" },
                 { icon: <MapPin size={18} className="text-primary" />, label: "Localização", val: "Rua Marina Lemos de Abreu, 68 B · Jardim Centenário" },
               ].map((c) => (
                 <div key={c.label} className="flex items-start gap-4 border-b border-border pb-5">
@@ -667,7 +675,7 @@ export default function App() {
             Vila Nova Cachoeirinha
           </span>
         </div>
-        <div className="max-w-7xl mx-auto mt-4 text-center md:text-right">
+        <div className="max-w-7xl mx-auto mt-2 text-right">
           <a href="/admin" className="text-muted-foreground/50 text-[10px] tracking-widest hover:text-muted-foreground transition-colors">
             Painel do dono
           </a>
