@@ -7,104 +7,23 @@ import { CartDrawer } from "@/app/components/CartDrawer";
 import { buildOrderMessage, type CartLine, type DeliveryMode, type PaymentInfo } from "@/app/cart-data";
 import logoFull from "@/imports/logo-transparent.png";
 import logoIcon from "@/imports/logo-mark.png";
+import { BARCAS, COMBINADOS, TEMAKIS, HOT_ROLLS, URAMAKIS, HOSSOMAKIS_OUTROS, DEFAULT_PROMOCOES, ALL_MENU_ITEMS, type MenuItem } from "@/app/menu-data";
 
 const WHATSAPP_NUMBER = "5511994597259";
 
-// depoimento: visitante envia -> Cloudflare Worker guarda como pendente e devolve
-// um link de aprovação de 1 toque -> esse link vai dentro da mensagem de WhatsApp
-// para o dono -> nada é publicado até ele tocar no link e aprovar.
+// depoimento: visitante envia -> Cloudflare Worker guarda como pendente, dispara
+// (server-side, via CallMeBot) um aviso automático no WhatsApp do dono com um link
+// de aprovação de 1 toque -> nada é publicado até ele tocar no link e aprovar.
+// O visitante nunca abre o próprio WhatsApp nesse fluxo.
 const TESTIMONIAL_API = "https://esthan-depoimentos.rieres.workers.dev";
 const TESTIMONIAL_SENT_KEY = "esthan_depoimento_enviado";
 
+// promoções: o dono edita pelo painel /admin (sem mexer em código) -> Worker guarda
+// -> site público busca aqui a cada carregamento. Enquanto ele nunca salvou nada,
+// mostra o pacote de promoções padrão (DEFAULT_PROMOCOES) como estava até agora.
+const PROMOTIONS_API = "https://esthan-depoimentos.rieres.workers.dev";
+
 const NAV_LINKS = ["Início", "Cardápio", "Sobre", "Pedido"];
-
-// ─── CARDÁPIO COMPLETO ────────────────────────────────────────
-
-const BARCAS = [
-  {
-    name: "Barca Hot",
-    desc: "4 Joy grelhados · 4 Niguiri grelhados · 4 Sushi Uramaki Skin · 4 Hot Especial · 4 Hot Doritos · 4 Hot Salmão",
-    price: "R$ 94,90",
-  },
-  {
-    name: "Barca Salmão",
-    desc: "10 Sashimis · 4 Filadélfia · 4 Skin · 4 Hot Especial · 6 Uramaki Salmão · 6 Hossomaki Salmão",
-    price: "R$ 99,90",
-  },
-  {
-    name: "Mini Barca Salmão",
-    desc: "05 Sashimis · 06 Uramaki Salmão · 06 Hossomaki Salmão",
-    price: "R$ 59,90",
-  },
-];
-
-const COMBINADOS = [
-  { name: "Combinado Califórnia", desc: "1 Temaki Califórnia · 4 Uramaki Califórnia · 2 Niguiri de Kani", price: "R$ 39,90" },
-  { name: "Combinado Casal", desc: "02 Temaki Salmão Completo · 04 Filadélfia · 04 Uramaki Filadélfia", price: "R$ 74,90" },
-  { name: "Combinado Casal Hot", desc: "02 Temaki Hot · 04 Sushi Filadélfia · 04 Uramaki Filadélfia", price: "R$ 76,90" },
-  { name: "Combinado Hot + Filadélfia", desc: "4 Hot Roll Salmão · 4 Sushi Filadélfia", price: "R$ 25,90" },
-  { name: "Combinado Joy", desc: "04 Joy Salmão · 04 Joy Pepino · 04 Joy Salmão Grelhado", price: "R$ 58,90" },
-  { name: "Combinado Joy + Niguiri", desc: "04 Joy Salmão · 04 Niguiri", price: "R$ 28,90" },
-  { name: "Combinado Misto Hossomaki", desc: "6 Hossomaki Skin · 6 Hossomaki Pepino · 6 Hossomaki Kani · 6 Mini Hot Roll · 6 Uramaki Salmão · 6 Hossomaki Salmão", price: "R$ 79,90" },
-  { name: "Combinado Nachos", desc: "1 Temaki Salmão Grelhado · 4 Hot Roll Doritos Especial", price: "R$ 42,90" },
-  { name: "Combinado Sushi Uramaki", desc: "08 Uramaki Filadélfia · 08 Uramaki Califórnia · 06 Uramaki Skin", price: "R$ 59,90" },
-  { name: "Combinado Temaki + Hot", desc: "01 Temaki Salmão · 04 Hot Roll", price: "R$ 39,90" },
-  { name: "Combinado Temaki + Joy", desc: "01 Temaki Salmão Completo · 04 Joy Salmão", price: "R$ 41,90" },
-  { name: "Combinado Temaki + Niguiri", desc: "01 Temaki Salmão Completo · 04 Niguiri", price: "R$ 38,90" },
-  { name: "Combinado Temaki + Sashimi", desc: "01 Temaki Salmão Completo · 05 Sashimis", price: "R$ 41,90" },
-  { name: "Temaki Hot + Hot", desc: "01 Temaki Hot · 04 Hot Roll", price: "R$ 41,90" },
-];
-
-const PROMOCOES = [
-  { name: "Promoção Combinado Casal", desc: "02 Temaki Salmão Completo · 04 Filadélfia · 04 Uramaki Filadélfia", oldPrice: "R$ 74,90", price: "R$ 68,90" },
-  { name: "Promoção Combinado Casal Hot", desc: "02 Temaki Salmão Completo · 04 Filadélfia · 04 Uramaki Filadélfia", oldPrice: null, price: "R$ 69,90" },
-  { name: "Promoção Hot Roll Salmão", desc: "Arroz, salmão, cream cheese e cebolinha · 8 unidades", oldPrice: "R$ 29,90", price: "R$ 25,90" },
-  { name: "Promoção Mini Barca", desc: "05 Sashimis · 06 Uramaki Salmão · 06 Hossomaki Salmão", oldPrice: "R$ 59,90", price: "R$ 49,90" },
-  { name: "Promoção Sushi Uramaki Skin", desc: "Arroz com gergilim, pele de salmão frita, cream cheese e cebolinha · 8 unidades", oldPrice: "R$ 22,90", price: "R$ 18,90" },
-  { name: "Promoção Temaki Hot", desc: "Salmão, cream cheese, cebolinha, arroz e panko", oldPrice: "R$ 31,90", price: "R$ 26,90" },
-  { name: "Temaki Hot + Hot (Promo)", desc: "01 Temaki Hot · 04 Hot Roll", oldPrice: null, price: "R$ 37,90" },
-];
-
-const TEMAKIS = [
-  { name: "Temaki Califórnia", desc: "Arroz, kani, manga e pepino", price: "R$ 26,90" },
-  { name: "Temaki Grill", desc: "Arroz, salmão grelhado, cream cheese e cebolinha", price: "R$ 29,90" },
-  { name: "Temaki Hot", desc: "Salmão, cream cheese, cebolinha, arroz e panko", price: "R$ 31,90" },
-  { name: "Temaki Salmão Completo", desc: "Arroz, salmão, cream cheese e cebolinha", price: "R$ 28,90" },
-  { name: "Temaki Skin", desc: "Arroz, pele de salmão frita e cream cheese", price: "R$ 25,90" },
-];
-
-const HOT_ROLLS = [
-  { name: "Hot Roll Doritos Especial", desc: "Arroz, salmão grelhado, cream cheese, cebolinha e doritos · 8 unidades", price: "R$ 35,90" },
-  { name: "Hot Roll Especial", desc: "Arroz, salmão, cream cheese e cebolinha · 8 unidades", price: "R$ 35,90" },
-  { name: "Hot Roll Salmão", desc: "Arroz, salmão, cream cheese e cebolinha · 8 unidades", price: "R$ 29,90" },
-];
-
-const URAMAKIS = [
-  { name: "Sushi Filadélfia", desc: "Arroz, salmão, cream cheese e cebolinha · 8 unidades", price: "R$ 24,90" },
-  { name: "Sushi Uramaki Califórnia", desc: "Arroz com gergilim, kani, manga e pepino · 8 unidades", price: "R$ 24,90" },
-  { name: "Sushi Uramaki Filadélfia", desc: "Arroz com gergilim, cream cheese e cebolinha · 8 unidades", price: "R$ 25,90" },
-  { name: "Sushi Uramaki Skin", desc: "Arroz com gergilim, pele de salmão frita, cream cheese e cebolinha · 8 unidades", price: "R$ 22,90" },
-  { name: "Uramaki Salmão", desc: "Arroz com gergelim e salmão · 8 unidades", price: "R$ 17,90" },
-  { name: "Uramaki Skin", desc: "Arroz com gergelim, pele de salmão frita, cream cheese e cebolinha · 8 unidades", price: "R$ 22,90" },
-];
-
-const HOSSOMAKIS_OUTROS = [
-  { name: "Hossomaki de Pepino", desc: "Arroz e pepino · 6 unidades", price: "R$ 12,90" },
-  { name: "Hossomaki de Salmão", desc: "Arroz e salmão · 6 unidades", price: "R$ 16,90" },
-  { name: "Joy de Salmão", desc: "Arroz, salmão, cream cheese e cebolinha · 6 unidades", price: "R$ 35,90" },
-  { name: "Niguiri Salmão", desc: "Salmão e arroz · 4 unidades", price: "R$ 14,90" },
-  { name: "Sashimi", desc: "20 unidades", price: "R$ 69,90" },
-];
-
-const SECTION_IMGS: Record<string, string> = {
-  barcas: "https://images.unsplash.com/photo-1663334038419-71e6f82e333f?w=800&h=600&fit=crop&auto=format",
-  combinados: "https://images.unsplash.com/photo-1617196035303-964a45bbc9f4?w=800&h=600&fit=crop&auto=format",
-  temakis: "https://images.unsplash.com/photo-1556906918-c3071bd11598?w=800&h=600&fit=crop&auto=format",
-  hotrolls: "https://images.unsplash.com/photo-1562436260-8c9216eeb703?w=800&h=600&fit=crop&crop=focalpoint&fp-x=0.9&fp-y=0.55&auto=format",
-  uramakis: "https://images.unsplash.com/photo-1774635800472-41eaa93c1453?w=800&h=600&fit=crop&auto=format",
-  promocoes: "https://images.unsplash.com/photo-1676037150398-c46c57172f28?w=800&h=600&fit=crop&auto=format",
-  outros: "https://images.unsplash.com/photo-1772285283419-b34f42b4a4df?w=800&h=600&fit=crop&auto=format",
-};
 
 const REVIEWS = [
   { name: "Camila R.", stars: 5, text: "Delivery chegou rapidíssimo e o sushi estava impecável. A Barca Hot é incrível!" },
@@ -124,13 +43,22 @@ function SectionHeader({ label, title }: { label: string; title: string }) {
   );
 }
 
-function ListItem({ name, desc, price, oldPrice, onSelect }: { name: string; desc?: string; price: string; oldPrice?: string | null; onSelect: () => void }) {
+function ListItem({ name, desc, price, oldPrice, img, onSelect }: { name: string; desc?: string; price: string; oldPrice?: string | null; img?: string; onSelect: () => void }) {
   return (
     <button
       onClick={onSelect}
-      className="w-full flex items-start justify-between gap-4 py-4 border-b border-border group hover:bg-card/40 px-2 -mx-2 transition-colors rounded text-left"
+      className="w-full flex items-center gap-4 py-4 border-b border-border group hover:bg-card/40 px-2 -mx-2 transition-colors rounded text-left"
     >
-      <div className="flex-1">
+      <div className="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 overflow-hidden rounded bg-secondary">
+        {img ? (
+          <ImageWithFallback src={img} alt={name} className="w-full h-full object-cover object-center" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <UtensilsCrossed size={20} className="text-muted-foreground/40" />
+          </div>
+        )}
+      </div>
+      <div className="flex-1 min-w-0">
         <span className="text-foreground font-semibold text-sm group-hover:text-primary transition-colors">{name}</span>
         {desc && <p className="text-muted-foreground text-xs mt-0.5 leading-relaxed">{desc}</p>}
       </div>
@@ -139,18 +67,6 @@ function ListItem({ name, desc, price, oldPrice, onSelect }: { name: string; des
         <span className="text-primary font-bold text-sm whitespace-nowrap">{price}</span>
       </div>
     </button>
-  );
-}
-
-function TwoColLayout({ children, imgKey }: { children: React.ReactNode; imgKey: string }) {
-  return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 lg:divide-x lg:divide-border">
-      <div className="bg-background p-8 lg:p-12 order-2 lg:order-1">{children}</div>
-      <div className="overflow-hidden order-1 lg:order-2 lg:self-center aspect-[4/3]">
-        <ImageWithFallback src={SECTION_IMGS[imgKey]} alt={imgKey}
-          className="w-full h-full object-cover object-center" />
-      </div>
-    </div>
   );
 }
 
@@ -186,6 +102,8 @@ export default function App() {
   const [showTestimonialForm, setShowTestimonialForm] = useState(false);
   const [testimonialSent, setTestimonialSent] = useState(false);
   const [testimonialBlocked, setTestimonialBlocked] = useState(false);
+  const [testimonialError, setTestimonialError] = useState(false);
+  const [testimonialSubmitting, setTestimonialSubmitting] = useState(false);
   const [depNome, setDepNome] = useState("");
   const [depItem, setDepItem] = useState("");
   const [depNota, setDepNota] = useState(5);
@@ -202,11 +120,35 @@ export default function App() {
       .catch(() => { /* serviço de aprovação fora do ar — a seção só fica sem os novos depoimentos */ });
   }, []);
 
+  // promoções configuradas pelo dono no painel /admin (nome do prato -> preço promocional).
+  // Enquanto ele nunca salvou nada (ou o Worker está fora do ar), mostra o pacote padrão.
+  const [promoConfig, setPromoConfig] = useState<Record<string, { active: boolean; price: string }> | null>(null);
+
+  useEffect(() => {
+    fetch(`${PROMOTIONS_API}/promotions`)
+      .then((r) => r.json())
+      .then((cfg) => setPromoConfig(cfg && typeof cfg === "object" ? cfg : {}))
+      .catch(() => setPromoConfig({})); // Worker fora do ar -> cai no pacote padrão abaixo
+  }, []);
+
+  const PROMOCOES: MenuItem[] =
+    promoConfig && Object.keys(promoConfig).length > 0
+      ? ALL_MENU_ITEMS
+          .filter((item) => promoConfig[item.name]?.active)
+          .map((item) => ({
+            name: item.name,
+            desc: item.desc,
+            img: item.img,
+            oldPrice: item.price,
+            price: promoConfig[item.name].price || item.price,
+          }))
+      : DEFAULT_PROMOCOES;
+
   async function sendTestimonialToWhatsApp(e: FormEvent) {
     e.preventDefault();
-    const stars = "★".repeat(depNota) + "☆".repeat(5 - depNota);
+    setTestimonialError(false);
+    setTestimonialSubmitting(true);
 
-    let approveUrl = "";
     try {
       const resp = await fetch(`${TESTIMONIAL_API}/submit`, {
         method: "POST",
@@ -214,25 +156,25 @@ export default function App() {
         body: JSON.stringify({ nome: depNome, item: depItem, nota: depNota, texto: depTexto }),
       });
 
-      // já existe um depoimento enviado a partir deste IP -> bloqueia sem abrir o WhatsApp
+      // já existe um depoimento enviado a partir deste IP -> bloqueia
       if (resp.status === 429) {
         setTestimonialBlocked(true);
         return;
       }
 
-      const data = await resp.json();
-      approveUrl = data.approveUrl || "";
+      if (!resp.ok) throw new Error("submit_failed");
+
+      // o Worker já dispara (server-side) o aviso automático no WhatsApp do dono —
+      // o visitante não precisa abrir nem enviar nada pelo próprio WhatsApp.
+      try { localStorage.setItem(TESTIMONIAL_SENT_KEY, "1"); } catch { /* localStorage indisponível */ }
+      setTestimonialSent(true);
     } catch {
-      // serviço de aprovação fora do ar — envia a mensagem pro WhatsApp mesmo assim,
-      // só sem o link de aprovação de 1 toque
+      // serviço de envio fora do ar — pede pra tentar de novo em vez de cair
+      // no fallback antigo de abrir o WhatsApp do visitante
+      setTestimonialError(true);
+    } finally {
+      setTestimonialSubmitting(false);
     }
-
-    const linkLine = approveUrl ? `\n\n✅ Aprovar e publicar no site: ${approveUrl}` : "";
-    const text = `Novo depoimento para aprovação no site:\nNome: ${depNome}\nItem pedido: ${depItem}\nAvaliação: ${stars} (${depNota}/5)\nDepoimento: ${depTexto}${linkLine}`;
-    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`, "_blank");
-
-    try { localStorage.setItem(TESTIMONIAL_SENT_KEY, "1"); } catch { /* localStorage indisponível */ }
-    setTestimonialSent(true);
   }
 
   const scrollTo = (id: string) => {
@@ -387,28 +329,22 @@ export default function App() {
 
           {/* GERAL */}
           {activeTab === "geral" && (
-            <div className="max-w-6xl mx-auto flex flex-col gap-16">
+            <div className="max-w-3xl mx-auto flex flex-col gap-14">
               {[
-                { title: "Barcas", items: BARCAS, imgKey: "barcas" },
-                { title: "Combinados", items: COMBINADOS, imgKey: "combinados" },
-                { title: "Promoções", items: PROMOCOES, imgKey: "promocoes" },
-                { title: "Temakis", items: TEMAKIS, imgKey: "temakis" },
-                { title: "Hot Rolls", items: HOT_ROLLS, imgKey: "hotrolls" },
-                { title: "Uramakis", items: URAMAKIS, imgKey: "uramakis" },
-                { title: "Outros", items: HOSSOMAKIS_OUTROS, imgKey: "outros" },
+                { title: "Barcas", items: BARCAS },
+                { title: "Combinados", items: COMBINADOS },
+                { title: "Promoções", items: PROMOCOES },
+                { title: "Temakis", items: TEMAKIS },
+                { title: "Hot Rolls", items: HOT_ROLLS },
+                { title: "Uramakis", items: URAMAKIS },
+                { title: "Outros", items: HOSSOMAKIS_OUTROS },
               ].map((section) => (
-                <div key={section.title} className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-                  <div className="overflow-hidden aspect-[4/3] order-1">
-                    <ImageWithFallback src={SECTION_IMGS[section.imgKey]} alt={section.imgKey}
-                      className="w-full h-full object-cover object-center" />
-                  </div>
-                  <div className="order-2">
-                    <h3 className="text-gradient text-2xl md:text-3xl font-black mb-4" style={{ fontFamily: "'Orbitron', sans-serif" }}>
-                      {section.title}
-                    </h3>
-                    <div className="divide-y divide-border">
-                      {section.items.map((item) => <ListItem key={item.name} {...item} onSelect={() => setActiveMenuItem(item)} />)}
-                    </div>
+                <div key={section.title}>
+                  <h3 className="text-gradient text-2xl md:text-3xl font-black mb-4" style={{ fontFamily: "'Orbitron', sans-serif" }}>
+                    {section.title}
+                  </h3>
+                  <div className="divide-y divide-border">
+                    {section.items.map((item) => <ListItem key={item.name} {...item} onSelect={() => setActiveMenuItem(item)} />)}
                   </div>
                 </div>
               ))}
@@ -417,27 +353,27 @@ export default function App() {
 
           {/* BARCAS */}
           {activeTab === "barcas" && (
-            <TwoColLayout imgKey="barcas">
+            <div className="max-w-3xl mx-auto">
               <SectionHeader label="Para compartilhar com todo mundo!" title="BARCAS" />
               <div className="divide-y divide-border">
                 {BARCAS.map((item) => <ListItem key={item.name} {...item} onSelect={() => setActiveMenuItem(item)} />)}
               </div>
-            </TwoColLayout>
+            </div>
           )}
 
           {/* COMBINADOS */}
           {activeTab === "combinados" && (
-            <TwoColLayout imgKey="combinados">
+            <div className="max-w-3xl mx-auto">
               <SectionHeader label="A melhor escolha para compartilhar!" title="COMBINADOS" />
               <div className="divide-y divide-border">
                 {COMBINADOS.map((item) => <ListItem key={item.name} {...item} onSelect={() => setActiveMenuItem(item)} />)}
               </div>
-            </TwoColLayout>
+            </div>
           )}
 
           {/* PROMOÇÕES */}
           {activeTab === "promocoes" && (
-            <TwoColLayout imgKey="promocoes">
+            <div className="max-w-3xl mx-auto">
               <div className="flex items-center gap-3 mb-8">
                 <Tag size={20} className="text-primary" />
                 <div>
@@ -448,22 +384,22 @@ export default function App() {
               <div className="divide-y divide-border">
                 {PROMOCOES.map((item) => <ListItem key={item.name} {...item} onSelect={() => setActiveMenuItem(item)} />)}
               </div>
-            </TwoColLayout>
+            </div>
           )}
 
           {/* TEMAKIS */}
           {activeTab === "temakis" && (
-            <TwoColLayout imgKey="temakis">
+            <div className="max-w-3xl mx-auto">
               <SectionHeader label="Generosos e irresistíveis!" title="TEMAKIS" />
               <div className="divide-y divide-border">
                 {TEMAKIS.map((item) => <ListItem key={item.name} {...item} onSelect={() => setActiveMenuItem(item)} />)}
               </div>
-            </TwoColLayout>
+            </div>
           )}
 
           {/* HOT ROLLS */}
           {activeTab === "hotrolls" && (
-            <TwoColLayout imgKey="hotrolls">
+            <div className="max-w-3xl mx-auto">
               <SectionHeader label="Crocantes por fora, cremosos por dentro!" title="HOT ROLLS" />
               <div className="flex items-center gap-2 mb-5 text-primary text-xs font-semibold">
                 <Flame size={14} /> Todos grelhados na hora
@@ -471,27 +407,27 @@ export default function App() {
               <div className="divide-y divide-border">
                 {HOT_ROLLS.map((item) => <ListItem key={item.name} {...item} onSelect={() => setActiveMenuItem(item)} />)}
               </div>
-            </TwoColLayout>
+            </div>
           )}
 
           {/* URAMAKIS */}
           {activeTab === "uramakis" && (
-            <TwoColLayout imgKey="uramakis">
+            <div className="max-w-3xl mx-auto">
               <SectionHeader label="Sabor e sofisticação em cada detalhe!" title="URAMAKIS" />
               <div className="divide-y divide-border">
                 {URAMAKIS.map((item) => <ListItem key={item.name} {...item} onSelect={() => setActiveMenuItem(item)} />)}
               </div>
-            </TwoColLayout>
+            </div>
           )}
 
           {/* OUTROS */}
           {activeTab === "outros" && (
-            <TwoColLayout imgKey="outros">
+            <div className="max-w-3xl mx-auto">
               <SectionHeader label="Hossomakis, Joy, Niguiri e Sashimi" title="OUTROS" />
               <div className="divide-y divide-border">
                 {HOSSOMAKIS_OUTROS.map((item) => <ListItem key={item.name} {...item} onSelect={() => setActiveMenuItem(item)} />)}
               </div>
-            </TwoColLayout>
+            </div>
           )}
         </div>
       </section>
@@ -607,16 +543,21 @@ export default function App() {
                     placeholder="Conte como foi sua experiência com a Esthan Sushi"
                     className="w-full bg-input-background border border-border px-4 py-3 text-sm text-foreground focus:border-primary outline-none transition-colors resize-none" />
                 </div>
-                <button type="submit"
-                  className="mt-2 py-3 bg-primary text-primary-foreground text-xs tracking-widest uppercase font-bold hover:brightness-110 transition-all">
-                  Enviar depoimento para aprovação
+                {testimonialError && (
+                  <p className="text-destructive text-xs leading-relaxed">
+                    Não conseguimos enviar seu depoimento agora. Tente novamente em instantes.
+                  </p>
+                )}
+                <button type="submit" disabled={testimonialSubmitting}
+                  className="mt-2 py-3 bg-primary text-primary-foreground text-xs tracking-widest uppercase font-bold hover:brightness-110 transition-all disabled:opacity-60 disabled:cursor-not-allowed">
+                  {testimonialSubmitting ? "Enviando..." : "Enviar depoimento para aprovação"}
                 </button>
               </form>
             )}
 
             {testimonialSent && (
               <p className="text-muted-foreground text-sm leading-relaxed border border-border p-6">
-                Obrigado pelo seu depoimento! Ele foi enviado para nossa equipe pelo WhatsApp e será publicado aqui assim que for revisado e aprovado.
+                Obrigado pelo seu depoimento! Ele foi enviado automaticamente para nossa equipe e será publicado aqui assim que for revisado e aprovado.
               </p>
             )}
           </div>
@@ -706,6 +647,11 @@ export default function App() {
           <span className="text-muted-foreground text-xs tracking-widest">
             Vila Nova Cachoeirinha
           </span>
+        </div>
+        <div className="max-w-7xl mx-auto mt-4 text-center md:text-right">
+          <a href="/admin" className="text-muted-foreground/50 text-[10px] tracking-widest hover:text-muted-foreground transition-colors">
+            Painel do dono
+          </a>
         </div>
       </footer>
 

@@ -54,8 +54,28 @@ function json(cors, body, status = 200) {
 const RESTAURANT_ORIGIN = { lat: -23.4737, lon: -46.6695 };
 const PREP_MINUTES = 15;
 
+// WhatsApp do dono que recebe a notificação de novo depoimento (mesmo número usado
+// nos pedidos do site). Não é segredo — só a CALLMEBOT_APIKEY (wrangler secret) é.
+const OWNER_PHONE = '5511994597259';
+
+// Avisa o dono no WhatsApp via CallMeBot assim que um depoimento é enviado.
+// Best-effort: se a CALLMEBOT_APIKEY não estiver configurada ou o CallMeBot falhar,
+// o depoimento continua salvo como pendente (o dono só não recebe o aviso automático).
+async function notifyOwnerWhatsApp(env, record, approveUrl) {
+  if (!env.CALLMEBOT_APIKEY) return;
+
+  const text = `Novo depoimento para aprovação no site:\nNome: ${record.nome}\nItem pedido: ${record.item || '-'}\nAvaliação: ${record.stars} (${record.nota}/5)\nDepoimento: ${record.texto}\n\n✅ Aprovar e publicar: ${approveUrl}`;
+  const callUrl = `https://api.callmebot.com/whatsapp.php?phone=${OWNER_PHONE}&text=${encodeURIComponent(text)}&apikey=${env.CALLMEBOT_APIKEY}`;
+
+  try {
+    await fetch(callUrl);
+  } catch {
+    // serviço do CallMeBot fora do ar — sem retry aqui, o depoimento já está salvo como pendente
+  }
+}
+
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
     const origin = request.headers.get('Origin') || '';
     const cors = corsHeaders(origin);
@@ -112,6 +132,10 @@ export default {
       }
 
       const approveUrl = `${url.origin}/approve?id=${id}`;
+
+      // Não bloqueia a resposta ao visitante esperando o CallMeBot responder.
+      ctx.waitUntil(notifyOwnerWhatsApp(env, record, approveUrl));
+
       return new Response(JSON.stringify({ id, approveUrl }), {
         headers: { ...cors, 'Content-Type': 'application/json' },
       });
@@ -148,6 +172,49 @@ export default {
       return new Response(JSON.stringify(approved), {
         headers: { ...cors, 'Content-Type': 'application/json', 'Cache-Control': 'max-age=60' },
       });
+    }
+
+    // Site público consulta isso pra saber quais pratos estão em promoção agora e por qual
+    // preço — o dono edita essa lista pelo painel /admin do site, sem mexer em código.
+    if (url.pathname === '/promotions' && request.method === 'GET') {
+      const raw = await env.TESTIMONIALS.get('promotions_config');
+      return json(cors, raw ? JSON.parse(raw) : {});
+    }
+
+    // Painel /admin testa a senha antes de liberar a edição (não salva nada aqui).
+    if (url.pathname === '/admin/check' && request.method === 'POST') {
+      if (!env.ADMIN_PASSWORD) return json(cors, { error: 'admin_not_configured' }, 503);
+
+      let body;
+      try { body = await request.json(); } catch { return json(cors, { error: 'invalid_json' }, 400); }
+
+      if (body.password !== env.ADMIN_PASSWORD) return json(cors, { error: 'wrong_password' }, 401);
+      return json(cors, { ok: true });
+    }
+
+    // Painel /admin salva aqui quais pratos estão em promoção e por qual preço.
+    // body esperado: { "Nome exato do prato": { active: true, price: "R$ 25,90" }, ... }
+    if (url.pathname === '/admin/promotions' && request.method === 'POST') {
+      if (!env.ADMIN_PASSWORD) return json(cors, { error: 'admin_not_configured' }, 503);
+      if (request.headers.get('X-Admin-Password') !== env.ADMIN_PASSWORD) {
+        return json(cors, { error: 'wrong_password' }, 401);
+      }
+
+      let body;
+      try { body = await request.json(); } catch { return json(cors, { error: 'invalid_json' }, 400); }
+      if (typeof body !== 'object' || body === null || Array.isArray(body)) {
+        return json(cors, { error: 'invalid_body' }, 400);
+      }
+
+      const clean = {};
+      for (const [name, entry] of Object.entries(body).slice(0, 200)) {
+        const cleanName = clip(name, 80).trim();
+        if (!cleanName || !entry?.active) continue;
+        clean[cleanName] = { active: true, price: clip(entry.price, 20).trim() };
+      }
+
+      await env.TESTIMONIALS.put('promotions_config', JSON.stringify(clean));
+      return json(cors, { ok: true, count: Object.keys(clean).length });
     }
 
     // Cliente escolheu "pagar agora" no site -> o Payment Brick do Mercado Pago manda o formData
