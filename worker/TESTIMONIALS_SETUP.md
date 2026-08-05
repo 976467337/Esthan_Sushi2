@@ -1,9 +1,9 @@
-# Ativar aviso automático no WhatsApp para novos depoimentos
+# Aviso automático no WhatsApp para novos depoimentos (já ativo ✅)
 
-O formulário de depoimentos do site já salva cada envio como "pendente" no Worker
-e gera um link de aprovação de 1 toque. Falta só um passo pra esse aviso chegar
-**automaticamente no WhatsApp `+5511946645976`** assim que alguém envia um
-depoimento — sem o visitante precisar abrir ou enviar nada pelo WhatsApp dele.
+O formulário de depoimentos do site salva cada envio como "pendente" no Worker
+e já está configurado pra avisar **automaticamente no WhatsApp `+5511946645976`**
+assim que alguém envia um depoimento — sem o visitante precisar abrir ou enviar
+nada pelo WhatsApp dele. Testado e confirmado funcionando.
 
 Isso é feito com a [Green API](https://green-api.com), gratuita até um volume
 generoso de mensagens/mês (mais que suficiente pros depoimentos de um restaurante).
