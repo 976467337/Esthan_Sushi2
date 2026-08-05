@@ -103,9 +103,10 @@ export default function App() {
     etaMinutes?: number,
     scheduledFor?: string,
     paymentInfo?: PaymentInfo,
-    deliveryPaymentMethod?: DeliveryPaymentMethod
+    deliveryPaymentMethod?: DeliveryPaymentMethod,
+    changeInfo?: string
   ) => {
-    const text = buildOrderMessage(cart, customerName, deliveryMode, address, etaMinutes, scheduledFor, paymentInfo, deliveryPaymentMethod);
+    const text = buildOrderMessage(cart, customerName, deliveryMode, address, etaMinutes, scheduledFor, paymentInfo, deliveryPaymentMethod, changeInfo);
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`, "_blank");
     setCart([]);
   };

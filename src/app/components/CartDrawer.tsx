@@ -26,7 +26,8 @@ export function CartDrawer({
     etaMinutes?: number,
     scheduledFor?: string,
     paymentInfo?: PaymentInfo,
-    deliveryPaymentMethod?: DeliveryPaymentMethod
+    deliveryPaymentMethod?: DeliveryPaymentMethod,
+    changeInfo?: string
   ) => void;
 }) {
   const [open, setOpen] = useState(false);
@@ -52,6 +53,9 @@ export function CartDrawer({
   const [orderId, setOrderId] = useState("");
   const [deliveryPaymentMethod, setDeliveryPaymentMethod] = useState<DeliveryPaymentMethod | null>(null);
   const [paymentMethodError, setPaymentMethodError] = useState(false);
+  const [needsChange, setNeedsChange] = useState<boolean | null>(null);
+  const [changeForAmount, setChangeForAmount] = useState("");
+  const [changeError, setChangeError] = useState(false);
 
   const itemCount = cart.reduce((sum, l) => sum + l.qty, 0);
 
@@ -71,6 +75,18 @@ export function CartDrawer({
     setEtaMinutes(undefined);
     setDeliveryPaymentMethod(null);
     setPaymentMethodError(false);
+    setNeedsChange(null);
+    setChangeForAmount("");
+    setChangeError(false);
+  };
+
+  const choosePaymentMethod = (method: DeliveryPaymentMethod) => {
+    setDeliveryPaymentMethod(method);
+    setPaymentMethodError(false);
+    // troco só faz sentido pra dinheiro — muda de método, limpa a resposta anterior
+    setNeedsChange(null);
+    setChangeForAmount("");
+    setChangeError(false);
   };
 
   const goToNameStep = () => {
@@ -198,7 +214,12 @@ export function CartDrawer({
       etaMinutes,
       scheduled ? nextOpeningLabel() : undefined,
       paymentInfo,
-      deliveryPaymentMethod ?? undefined
+      deliveryPaymentMethod ?? undefined,
+      deliveryPaymentMethod === "Dinheiro"
+        ? needsChange
+          ? `Precisa de troco para: ${changeForAmount.trim()}`
+          : "Não precisa de troco"
+        : undefined
     );
     setCustomerName("");
     setScheduled(false);
@@ -209,6 +230,16 @@ export function CartDrawer({
     if (!deliveryPaymentMethod) {
       setPaymentMethodError(true);
       return;
+    }
+    if (deliveryPaymentMethod === "Dinheiro") {
+      if (needsChange === null) {
+        setChangeError(true);
+        return;
+      }
+      if (needsChange && !changeForAmount.trim()) {
+        setChangeError(true);
+        return;
+      }
     }
     handleCheckout();
   };
@@ -585,7 +616,7 @@ export function CartDrawer({
                       <div className="grid grid-cols-2 gap-2">
                         {DELIVERY_PAYMENT_METHODS.map((method) => (
                           <button key={method} type="button"
-                            onClick={() => { setDeliveryPaymentMethod(method); setPaymentMethodError(false); }}
+                            onClick={() => choosePaymentMethod(method)}
                             className={`py-2.5 px-3 border text-xs tracking-widest uppercase font-semibold transition-colors ${
                               deliveryPaymentMethod === method
                                 ? "border-primary bg-primary/10 text-primary"
@@ -599,6 +630,45 @@ export function CartDrawer({
                         <p className="text-destructive text-xs">Escolha a forma de pagamento pra continuar.</p>
                       )}
                     </div>
+
+                    {deliveryPaymentMethod === "Dinheiro" && (
+                      <div className="flex flex-col gap-2 border border-border px-4 py-4">
+                        <span className="text-muted-foreground text-xs tracking-widest uppercase">Vai precisar de troco?</span>
+                        <div className="grid grid-cols-2 gap-2">
+                          <button type="button"
+                            onClick={() => { setNeedsChange(true); setChangeError(false); }}
+                            className={`py-2.5 px-3 border text-xs tracking-widest uppercase font-semibold transition-colors ${
+                              needsChange === true
+                                ? "border-primary bg-primary/10 text-primary"
+                                : "border-border text-muted-foreground hover:border-primary/40"
+                            }`}>
+                            Sim
+                          </button>
+                          <button type="button"
+                            onClick={() => { setNeedsChange(false); setChangeForAmount(""); setChangeError(false); }}
+                            className={`py-2.5 px-3 border text-xs tracking-widest uppercase font-semibold transition-colors ${
+                              needsChange === false
+                                ? "border-primary bg-primary/10 text-primary"
+                                : "border-border text-muted-foreground hover:border-primary/40"
+                            }`}>
+                            Não
+                          </button>
+                        </div>
+                        {needsChange && (
+                          <input
+                            value={changeForAmount}
+                            onChange={(e) => { setChangeForAmount(e.target.value); setChangeError(false); }}
+                            placeholder="Troco para quanto? Ex: R$ 100,00"
+                            className="w-full bg-input-background border border-border px-3 py-2.5 text-sm text-foreground focus:border-primary outline-none transition-colors"
+                          />
+                        )}
+                        {changeError && (
+                          <p className="text-destructive text-xs">
+                            {needsChange === null ? "Escolha se vai precisar de troco." : "Informa pra quanto precisa do troco."}
+                          </p>
+                        )}
+                      </div>
+                    )}
 
                     {isPaymentConfigured() && (
                       <button onClick={goToPaymentStep}

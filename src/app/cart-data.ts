@@ -94,7 +94,8 @@ export function buildOrderMessage(
   etaMinutes?: number,
   scheduledFor?: string,
   paymentInfo?: PaymentInfo,
-  deliveryPaymentMethod?: DeliveryPaymentMethod
+  deliveryPaymentMethod?: DeliveryPaymentMethod,
+  changeInfo?: string
 ): string {
   const lines = cart.map((line) => {
     const extrasText = line.extras && line.extras.length ? ` (${line.extras.join(", ")})` : "";
@@ -115,10 +116,12 @@ export function buildOrderMessage(
     ? `\n⏰ PEDIDO AGENDADO — fora do horário de funcionamento. Preparar a partir de ${scheduledFor}.\n`
     : "";
 
+  const changeBlock = changeInfo ? `\n${changeInfo}` : "";
+
   const paymentBlock = paymentInfo
     ? `\n\n✅ Pagamento já realizado online via ${paymentInfo.method === "pix" ? "Pix" : "Cartão"} (ID ${paymentInfo.id})`
     : deliveryPaymentMethod
-    ? `\n\nPagamento na entrega: ${deliveryPaymentMethod}`
+    ? `\n\nPagamento na entrega: ${deliveryPaymentMethod}${changeBlock}`
     : "\n\nPagamento: na entrega (dinheiro ou cartão com o motoboy)";
 
   return `Novo pedido pelo site:\n${scheduledBlock}\nCliente: ${customerName}\n\n${lines.join("\n")}\n\nSubtotal: ${formatPrice(itemsTotal)}${modeBlock}${paymentBlock}\n\nTotal: ${formatPrice(grandTotal)}${etaBlock}`;
