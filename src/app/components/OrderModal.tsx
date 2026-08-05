@@ -109,6 +109,8 @@ export function OrderModal({
                       priceLabel = "Grátis";
                     } else if (packetsBefore === 0 && qty > 1) {
                       priceLabel = `1 grátis + ${qty - 1} x ${formatPrice(EXTRA_SAUCE_FEE)}`;
+                    } else if (qty === 1) {
+                      priceLabel = formatPrice(EXTRA_SAUCE_FEE);
                     } else {
                       priceLabel = `${qty} x ${formatPrice(EXTRA_SAUCE_FEE)}`;
                     }
