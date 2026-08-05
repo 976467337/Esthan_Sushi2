@@ -23,12 +23,12 @@ export const EXTRA_SAUCE_FEE = 2;
 
 // preços placeholder — ajuste os valores reais antes de publicar
 export const DRINKS = [
-  { name: "Coca-Cola Lata 350ml", price: 6 },
-  { name: "Coca-Cola Zero Lata 350ml", price: 6 },
+  { name: "Coca-Cola Lata 350ml", price: 7 },
+  { name: "Coca-Cola Zero Lata 350ml", price: 7 },
   { name: "Coca-Cola Garrafa 600ml", price: 10 },
   { name: "Coca-Cola Zero Garrafa 600ml", price: 10 },
-  { name: "Guaraná Antarctica Lata 350ml", price: 6 },
-  { name: "Guaraná Antarctica Zero Lata 350ml", price: 6 },
+  { name: "Guaraná Antarctica Lata 350ml", price: 7 },
+  { name: "Guaraná Antarctica Zero Lata 350ml", price: 7 },
   { name: "Guaraná Antarctica Garrafa 600ml", price: 10 },
   { name: "Guaraná Antarctica Zero Garrafa 600ml", price: 10 },
   { name: "Água Mineral 500ml", price: 4 },
