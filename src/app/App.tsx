@@ -569,7 +569,7 @@ export default function App() {
         <div className="max-w-4xl mx-auto px-6 text-center relative z-10">
           <p className="text-white/80 text-xs tracking-[0.4em] uppercase mb-4 font-semibold">Delivery</p>
           <h2 className="text-4xl md:text-6xl font-black text-white mb-6 leading-tight [text-shadow:0_2px_16px_rgba(0,0,0,0.35)]" style={{ fontFamily: "'Orbitron', sans-serif" }}>
-            PEÇA AGORA,<br />COMA EM ~45 MIN
+            PEÇA AGORA,<br />COMA EM APROXIMADAMENTE 45 MIN
           </h2>
           <p className="text-white/90 text-lg mb-10 font-light max-w-xl mx-auto">
             Monte seu pedido no site e a gente prepara na hora. Tempo médio de entrega, pode variar conforme o
