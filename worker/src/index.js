@@ -54,24 +54,29 @@ function json(cors, body, status = 200) {
 const RESTAURANT_ORIGIN = { lat: -23.4737, lon: -46.6695 };
 const PREP_MINUTES = 15;
 
-// WhatsApp que recebe a notificação de novo depoimento via CallMeBot — número
-// separado do que recebe os pedidos dos clientes (esse aqui só precisa ter feito
-// a autorização do CallMeBot). Não é segredo — só a CALLMEBOT_APIKEY (wrangler secret) é.
+// WhatsApp que recebe a notificação de novo depoimento — número separado do que
+// recebe os pedidos dos clientes. Não é segredo — só as credenciais da Green API
+// (GREENAPI_ID_INSTANCE / GREENAPI_API_TOKEN, wrangler secret) são.
 const OWNER_PHONE = '5511946645976';
 
-// Avisa o dono no WhatsApp via CallMeBot assim que um depoimento é enviado.
-// Best-effort: se a CALLMEBOT_APIKEY não estiver configurada ou o CallMeBot falhar,
+// Avisa o dono no WhatsApp via Green API (mensagem enviada pelo WhatsApp conectado
+// via QR Code no painel da Green API) assim que um depoimento é enviado.
+// Best-effort: se as credenciais não estiverem configuradas ou a Green API falhar,
 // o depoimento continua salvo como pendente (o dono só não recebe o aviso automático).
 async function notifyOwnerWhatsApp(env, record, approveUrl) {
-  if (!env.CALLMEBOT_APIKEY) return;
+  if (!env.GREENAPI_ID_INSTANCE || !env.GREENAPI_API_TOKEN) return;
 
   const text = `Novo depoimento para aprovação no site:\nNome: ${record.nome}\nItem pedido: ${record.item || '-'}\nAvaliação: ${record.stars} (${record.nota}/5)\nDepoimento: ${record.texto}\n\n✅ Aprovar e publicar: ${approveUrl}`;
-  const callUrl = `https://api.callmebot.com/whatsapp.php?phone=${OWNER_PHONE}&text=${encodeURIComponent(text)}&apikey=${env.CALLMEBOT_APIKEY}`;
+  const url = `https://api.green-api.com/waInstance${env.GREENAPI_ID_INSTANCE}/sendMessage/${env.GREENAPI_API_TOKEN}`;
 
   try {
-    await fetch(callUrl);
+    await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chatId: `${OWNER_PHONE}@c.us`, message: text }),
+    });
   } catch {
-    // serviço do CallMeBot fora do ar — sem retry aqui, o depoimento já está salvo como pendente
+    // Green API fora do ar — sem retry aqui, o depoimento já está salvo como pendente
   }
 }
 
