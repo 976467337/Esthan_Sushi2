@@ -635,9 +635,9 @@ export default function App() {
           <div className="flex flex-col gap-4">
             <p className="text-foreground font-semibold tracking-widest uppercase text-sm mb-2">Como fazer seu pedido?</p>
             {[
-              { step: "01", title: "Escolha do cardápio", desc: "Selecione seus rolls favoritos e anote nome e quantidade." },
-              { step: "02", title: "Mande no WhatsApp", desc: "Envie seu pedido com o endereço de entrega pelo WhatsApp." },
-              { step: "03", title: "Confirme e pague", desc: "Confirmamos o total. Pagamento em dinheiro ou transferência na entrega." },
+              { step: "01", title: "Monte seu carrinho", desc: "Clique nos pratos que quiser direto no cardápio do site e vá adicionando ao carrinho." },
+              { step: "02", title: "Entrega ou retirada", desc: "Informe seu endereço (a gente calcula o tempo estimado na hora) ou escolha retirar no local." },
+              { step: "03", title: "Pagamento e envio", desc: "Escolha como vai pagar na entrega (dinheiro, crédito, débito, VR/voucher ou Pix) e envie — a mensagem já sai pronta no WhatsApp." },
               { step: "04", title: "Aproveite!", desc: "Seu pedido chega em média em 45 minutos, fresco e pronto para comer." },
             ].map((s) => (
               <div key={s.step} className="flex gap-5 border border-border p-5 hover:border-primary/40 transition-colors">
