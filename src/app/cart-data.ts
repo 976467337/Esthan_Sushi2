@@ -8,17 +8,14 @@ export type CartLine = {
 
 // preços placeholder — ajuste os valores reais antes de publicar
 export const EXTRAS = [
-  { name: "Shoyu extra", price: 0 },
-  { name: "Gengibre extra", price: 0 },
-  { name: "Wasabi extra", price: 0 },
+  { name: "Shoyu", price: 0 },
+  { name: "Gengibre", price: 0 },
+  { name: "Wasabi", price: 0 },
   { name: "Molho tarê", price: 2 },
-  { name: "Molho agridoce", price: 2 },
-  { name: "Cream cheese extra", price: 3 },
-  { name: "Gergelim extra", price: 1 },
 ];
 
 // só o 1º molho grátis escolhido sai sem custo — a partir do 2º, cobra essa taxa por unidade
-export const FREE_SAUCE_NAMES = ["Shoyu extra", "Gengibre extra", "Wasabi extra"];
+export const FREE_SAUCE_NAMES = ["Shoyu", "Gengibre", "Wasabi"];
 export const EXTRA_SAUCE_FEE = 2;
 
 // preços placeholder — ajuste os valores reais antes de publicar
