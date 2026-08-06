@@ -1,9 +1,10 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { motion } from "motion/react";
-import { Menu, X, Phone, Clock, ChevronDown, Bike, ShoppingBag, Star, MapPin, Flame, Tag, Sailboat, UtensilsCrossed, Layers, IceCreamCone, Disc, Sparkles } from "lucide-react";
+import { Menu, X, Phone, Clock, ChevronDown, Bike, ShoppingBag, Star, MapPin, Flame, Tag, Sailboat, UtensilsCrossed, Layers, IceCreamCone, Disc, Sparkles, Images } from "lucide-react";
 import { ImageWithFallback } from "@/app/components/figma/ImageWithFallback";
 import { OrderModal } from "@/app/components/OrderModal";
 import { AllReviewsModal } from "@/app/components/AllReviewsModal";
+import { PhotoGalleryModal } from "@/app/components/PhotoGalleryModal";
 import { CartDrawer } from "@/app/components/CartDrawer";
 import { buildOrderMessage, type CartLine, type DeliveryMode, type PaymentInfo, type DeliveryPaymentMethod } from "@/app/cart-data";
 import logoFull from "@/imports/logo-transparent.png";
@@ -64,7 +65,7 @@ function ListItem({ name, desc, price, oldPrice, img, onSelect }: { name: string
     >
       <div className="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 overflow-hidden rounded bg-secondary">
         {img ? (
-          <ImageWithFallback src={img} alt={name} className="w-full h-full object-cover object-center" />
+          <ImageWithFallback src={img} alt={name} className="w-full h-full object-contain object-center" />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
             <UtensilsCrossed size={20} className="text-muted-foreground/40" />
@@ -89,7 +90,8 @@ export default function App() {
   const [activeTab, setActiveTab] = useState("geral");
 
   const [cart, setCart] = useState<CartLine[]>([]);
-  const [activeMenuItem, setActiveMenuItem] = useState<{ name: string; price: string } | null>(null);
+  const [activeMenuItem, setActiveMenuItem] = useState<MenuItem | null>(null);
+  const [galleryOpen, setGalleryOpen] = useState(false);
 
   const addLineToCart = (line: CartLine) => setCart((prev) => [...prev, line]);
   const updateCartQty = (id: string, qty: number) =>
@@ -104,9 +106,10 @@ export default function App() {
     scheduledFor?: string,
     paymentInfo?: PaymentInfo,
     deliveryPaymentMethod?: DeliveryPaymentMethod,
-    changeInfo?: string
+    changeInfo?: string,
+    distanceKm?: number
   ) => {
-    const text = buildOrderMessage(cart, customerName, deliveryMode, address, etaMinutes, scheduledFor, paymentInfo, deliveryPaymentMethod, changeInfo);
+    const text = buildOrderMessage(cart, customerName, deliveryMode, address, etaMinutes, scheduledFor, paymentInfo, deliveryPaymentMethod, changeInfo, distanceKm);
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`, "_blank");
     setCart([]);
   };
@@ -314,7 +317,7 @@ export default function App() {
           {[
             { icon: <Bike size={22} className="text-primary" />, title: "Entrega Rápida", desc: "Média de 45 minutos na sua porta" },
             { icon: <Clock size={22} className="text-primary" />, title: "Horário de Delivery", desc: "Segunda a Sábado · 19h30 às 23h" },
-            { icon: <MapPin size={22} className="text-primary" />, title: "Região de Entrega", desc: "Vila Nova Cachoeirinha e região" },
+            { icon: <MapPin size={22} className="text-primary" />, title: "Região de Entrega", desc: "Vila Nova Cachoeirinha e região · Até 20 km por R$ 7,00" },
           ].map((info) => (
             <div key={info.title} className="flex items-center gap-4 px-8 py-6">
               <div className="w-12 h-12 border border-primary/30 flex items-center justify-center flex-shrink-0">{info.icon}</div>
@@ -332,7 +335,11 @@ export default function App() {
         <div className="max-w-7xl mx-auto">
           <div className="mb-12 text-center">
             <p className="text-primary text-xs tracking-[0.4em] uppercase mb-3">Nossa Carta</p>
-            <h2 className="text-gradient text-4xl md:text-5xl font-black" style={{ fontFamily: "'Orbitron', sans-serif" }}>CARDÁPIO</h2>
+            <h2 className="text-gradient text-4xl md:text-5xl font-black mb-5" style={{ fontFamily: "'Orbitron', sans-serif" }}>CARDÁPIO</h2>
+            <button onClick={() => setGalleryOpen(true)}
+              className="inline-flex items-center gap-2 px-5 py-2.5 border border-primary/40 text-primary text-xs tracking-widest uppercase font-semibold hover:bg-primary/10 transition-colors">
+              <Images size={14} /> Ver fotos em tamanho grande
+            </button>
           </div>
 
           {/* TABS */}
@@ -637,6 +644,7 @@ export default function App() {
                 { icon: <Phone size={18} className="text-primary" />, label: "WhatsApp", val: "(11) 99459-7259" },
                 { icon: <Clock size={18} className="text-primary" />, label: "Horário de delivery", val: "Segunda a Sábado · 19h30 às 23h" },
                 { icon: <MapPin size={18} className="text-primary" />, label: "Localização", val: "Rua Marina Lemos de Abreu, 68 B · Jardim Centenário" },
+                { icon: <Bike size={18} className="text-primary" />, label: "Taxa de entrega", val: "Até 20 km: R$ 7,00 · Acima disso, valor combinado" },
               ].map((c) => (
                 <div key={c.label} className="flex items-start gap-4 border-b border-border pb-5">
                   <div className="w-10 h-10 border border-primary/30 flex items-center justify-center flex-shrink-0">{c.icon}</div>
@@ -693,6 +701,7 @@ export default function App() {
 
       <OrderModal item={activeMenuItem} onClose={() => setActiveMenuItem(null)} onAddLine={addLineToCart} />
       <AllReviewsModal open={showAllReviews} reviews={allReviews} onClose={() => setShowAllReviews(false)} />
+      <PhotoGalleryModal open={galleryOpen} onClose={() => setGalleryOpen(false)} />
       <CartDrawer cart={cart} onUpdateQty={updateCartQty} onRemove={removeFromCart} onCheckout={checkoutViaWhatsApp} />
     </div>
   );

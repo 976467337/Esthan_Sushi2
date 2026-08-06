@@ -7,8 +7,12 @@ export const RESTAURANT_ADDRESS = "Rua Marina Lemos de Abreu, 68 - Jardim Centen
 // mostrar um tempo aproximado ao cliente em vez de nada.
 export const FALLBACK_TOTAL_MINUTES = 45;
 
+// Acima disso, a taxa fixa de R$7 não vale mais — o frete precisa ser combinado
+// com os parceiros de entrega antes de confirmar o pedido.
+export const FAR_DELIVERY_KM_THRESHOLD = 20;
+
 export type GeocodeResult = { found: boolean; lat?: number; lon?: number; displayName?: string };
-export type EtaResult = { travelMinutes: number; prepMinutes: number; totalMinutes: number };
+export type EtaResult = { travelMinutes: number; prepMinutes: number; totalMinutes: number; distanceKm: number };
 
 export async function geocodeAddress(address: string): Promise<GeocodeResult> {
   const resp = await fetch(`${API_BASE}/geocode?address=${encodeURIComponent(address)}`);

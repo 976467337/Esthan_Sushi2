@@ -3,6 +3,7 @@
 import imgGuaranaAntarctica from "@/imports/bebidas/guarana-antarctica.jpg";
 import imgRedBull from "@/imports/bebidas/red-bull.jpg";
 import imgHeineken from "@/imports/bebidas/heineken.jpg";
+import { FAR_DELIVERY_KM_THRESHOLD } from "@/app/delivery";
 
 export type CartLine = {
   id: string;
@@ -105,21 +106,30 @@ export function buildOrderMessage(
   scheduledFor?: string,
   paymentInfo?: PaymentInfo,
   deliveryPaymentMethod?: DeliveryPaymentMethod,
-  changeInfo?: string
+  changeInfo?: string,
+  distanceKm?: number
 ): string {
   const lines = cart.map((line) => {
     const extrasText = line.extras && line.extras.length ? ` (${line.extras.join(", ")})` : "";
     return `${line.qty}x ${line.name}${extrasText} - ${formatPrice(lineTotal(line))}`;
   });
 
+  // Acima do raio padrão, a taxa fixa não vale — o frete é combinado à parte com
+  // o cliente, então não soma nenhum valor de entrega ainda desconhecido no total.
+  const isFarDelivery = deliveryMode === "delivery" && !!distanceKm && distanceKm > FAR_DELIVERY_KM_THRESHOLD;
+
   const itemsTotal = cartTotal(cart);
-  const deliveryFee = deliveryMode === "delivery" ? DELIVERY_FEE : 0;
+  const deliveryFee = deliveryMode === "delivery" && !isFarDelivery ? DELIVERY_FEE : 0;
   const grandTotal = itemsTotal + deliveryFee;
+
+  const deliveryFeeLine = isFarDelivery
+    ? `Taxa de entrega: A combinar — endereço a ~${String(distanceKm).replace(".", ",")}km do restaurante (acima do raio padrão de ${FAR_DELIVERY_KM_THRESHOLD}km). Falar com o cliente antes de confirmar o frete.`
+    : `Taxa de entrega: ${formatPrice(DELIVERY_FEE)}`;
 
   const modeBlock =
     deliveryMode === "pickup"
       ? `\n\nRetirada no local: ${address} (sem taxa de entrega)`
-      : `\n\nEndereço de entrega: ${address}\nTaxa de entrega: ${formatPrice(DELIVERY_FEE)}`;
+      : `\n\nEndereço de entrega: ${address}\n${deliveryFeeLine}`;
 
   const etaBlock = etaMinutes ? `\nTempo estimado de entrega: ~${etaMinutes} min (já com o preparo)` : "";
   const scheduledBlock = scheduledFor
@@ -134,5 +144,7 @@ export function buildOrderMessage(
     ? `\n\nPagamento na entrega: ${deliveryPaymentMethod}${changeBlock}`
     : "\n\nPagamento: na entrega (dinheiro ou cartão com o motoboy)";
 
-  return `Novo pedido pelo site:\n${scheduledBlock}\nCliente: ${customerName}\n\n${lines.join("\n")}\n\nSubtotal: ${formatPrice(itemsTotal)}${modeBlock}${paymentBlock}\n\nTotal: ${formatPrice(grandTotal)}${etaBlock}`;
+  const totalLabel = isFarDelivery ? `Total (itens, frete a combinar)` : "Total";
+
+  return `Novo pedido pelo site:\n${scheduledBlock}\nCliente: ${customerName}\n\n${lines.join("\n")}\n\nSubtotal: ${formatPrice(itemsTotal)}${modeBlock}${paymentBlock}\n\n${totalLabel}: ${formatPrice(grandTotal)}${etaBlock}`;
 }

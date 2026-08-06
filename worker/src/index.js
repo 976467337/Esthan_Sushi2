@@ -322,7 +322,8 @@ export default {
 
       if (data.code !== 'Ok' || !data.routes?.length) return json(cors, { error: 'no_route' }, 502);
       const travelMinutes = Math.max(1, Math.ceil(data.routes[0].duration / 60));
-      return json(cors, { travelMinutes, prepMinutes: PREP_MINUTES, totalMinutes: travelMinutes + PREP_MINUTES });
+      const distanceKm = Math.round((data.routes[0].distance / 1000) * 10) / 10;
+      return json(cors, { travelMinutes, prepMinutes: PREP_MINUTES, totalMinutes: travelMinutes + PREP_MINUTES, distanceKm });
     }
 
     return new Response('Not found', { status: 404 });

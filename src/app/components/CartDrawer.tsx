@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { X, Minus, Plus, Trash2, ShoppingBag, Loader2, CheckCircle2, AlertCircle, ArrowLeft, Heart, Clock } from "lucide-react";
 import { cartTotal, formatPrice, parsePrice, lineTotal, DELIVERY_FEE, DELIVERY_PAYMENT_METHODS, type CartLine, type DeliveryMode, type PaymentInfo, type DeliveryPaymentMethod } from "@/app/cart-data";
-import { geocodeAddress, estimateDelivery, lookupCep, RESTAURANT_ADDRESS, FALLBACK_TOTAL_MINUTES, type CepResult } from "@/app/delivery";
+import { geocodeAddress, estimateDelivery, lookupCep, RESTAURANT_ADDRESS, FALLBACK_TOTAL_MINUTES, FAR_DELIVERY_KM_THRESHOLD, type CepResult } from "@/app/delivery";
 import { isWithinBusinessHours, nextOpeningLabel } from "@/app/business-hours";
 import { isPaymentConfigured } from "@/app/payments";
 import { PaymentStep } from "@/app/components/PaymentStep";
@@ -27,11 +27,12 @@ export function CartDrawer({
     scheduledFor?: string,
     paymentInfo?: PaymentInfo,
     deliveryPaymentMethod?: DeliveryPaymentMethod,
-    changeInfo?: string
+    changeInfo?: string,
+    distanceKm?: number
   ) => void;
 }) {
   const [open, setOpen] = useState(false);
-  const [step, setStep] = useState<"cart" | "closed" | "name" | "mode" | "address" | "payment">("cart");
+  const [step, setStep] = useState<"cart" | "closed" | "name" | "mode" | "address" | "payment" | "farNotice">("cart");
   const [scheduled, setScheduled] = useState(false);
   const [customerName, setCustomerName] = useState("");
   const [nameError, setNameError] = useState(false);
@@ -50,6 +51,7 @@ export function CartDrawer({
   const [errorMsg, setErrorMsg] = useState("");
   const [confirmedAddress, setConfirmedAddress] = useState("");
   const [etaMinutes, setEtaMinutes] = useState<number | undefined>(undefined);
+  const [distanceKm, setDistanceKm] = useState<number | undefined>(undefined);
   const [orderId, setOrderId] = useState("");
   const [deliveryPaymentMethod, setDeliveryPaymentMethod] = useState<DeliveryPaymentMethod | null>(null);
   const [paymentMethodError, setPaymentMethodError] = useState(false);
@@ -73,6 +75,7 @@ export function CartDrawer({
     setErrorMsg("");
     setConfirmedAddress("");
     setEtaMinutes(undefined);
+    setDistanceKm(undefined);
     setDeliveryPaymentMethod(null);
     setPaymentMethodError(false);
     setNeedsChange(null);
@@ -155,6 +158,7 @@ export function CartDrawer({
     // trajeto de verdade (endereço não geocodificou, rota falhou), cai na média
     // que já anunciamos no site em vez de deixar sem nenhuma estimativa.
     setEtaMinutes(eta?.totalMinutes ?? FALLBACK_TOTAL_MINUTES);
+    setDistanceKm(eta?.distanceKm);
     setConfirmedAddress(fullAddress);
     setStatus("confirmed");
   };
@@ -182,6 +186,7 @@ export function CartDrawer({
     // por algum motivo, cai na média que já anunciamos no site.
     const eta = await estimateDelivery(geo.lat, geo.lon);
     setEtaMinutes(eta?.totalMinutes ?? FALLBACK_TOTAL_MINUTES);
+    setDistanceKm(eta?.distanceKm);
     setConfirmedAddress(fullAddress);
     setStatus("confirmed");
   };
@@ -225,11 +230,18 @@ export function CartDrawer({
       scheduled ? nextOpeningLabel() : undefined,
       paymentInfo,
       deliveryPaymentMethod ?? undefined,
-      changeInfo
+      changeInfo,
+      distanceKm
     );
     setCustomerName("");
     setScheduled(false);
-    handleClose();
+    // endereço fora do raio padrão — mostra a mensagem explicando que o frete
+    // ainda vai ser combinado, em vez de fechar a gaveta direto.
+    if (isFarDelivery) {
+      setStep("farNotice");
+    } else {
+      handleClose();
+    }
   };
 
   const confirmDeliveryPaymentAndCheckout = () => {
@@ -262,7 +274,11 @@ export function CartDrawer({
     setStep("payment");
   };
 
-  const orderGrandTotal = cartTotal(cart) + (deliveryMode === "delivery" ? DELIVERY_FEE : 0);
+  // Fora do raio padrão de entrega — a taxa fixa de R$7 não vale mais, o frete
+  // precisa ser combinado com os parceiros de entrega antes de confirmar.
+  const isFarDelivery = deliveryMode === "delivery" && !!distanceKm && distanceKm > FAR_DELIVERY_KM_THRESHOLD;
+
+  const orderGrandTotal = cartTotal(cart) + (deliveryMode === "delivery" && !isFarDelivery ? DELIVERY_FEE : 0);
 
   return (
     <>
@@ -306,6 +322,7 @@ export function CartDrawer({
                       : step === "name" ? "Quem está pedindo?"
                       : step === "mode" ? "Entrega ou retirada?"
                       : step === "payment" ? "Pagamento"
+                      : step === "farNotice" ? "Pedido recebido!"
                       : deliveryMode === "pickup" ? "Retirada no local" : "Endereço de entrega"}
                   </h3>
                 </div>
@@ -602,6 +619,19 @@ export function CartDrawer({
                       </div>
                     )}
 
+                    {isFarDelivery && (
+                      <div className="flex items-start gap-3 border border-amber-500/40 bg-amber-500/10 px-4 py-4">
+                        <AlertCircle size={20} className="text-amber-500 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <p className="text-foreground text-sm font-semibold">Endereço fora do raio de 20 km</p>
+                          <p className="text-muted-foreground text-xs mt-1 leading-relaxed">
+                            A taxa fixa de R$7 vale até 20 km. Pra esse endereço (~{String(distanceKm).replace(".", ",")}km), o frete precisa ser combinado
+                            com nossos parceiros de entrega antes de confirmar — a gente retorna com o valor certinho.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
                     <div className="border border-border px-4 py-4 flex flex-col gap-2">
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-muted-foreground">Subtotal</span>
@@ -609,11 +639,13 @@ export function CartDrawer({
                       </div>
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-muted-foreground">Taxa de entrega</span>
-                        <span className="text-foreground">{deliveryMode === "delivery" ? formatPrice(DELIVERY_FEE) : "Sem taxa"}</span>
+                        <span className="text-foreground">
+                          {deliveryMode !== "delivery" ? "Sem taxa" : isFarDelivery ? "A combinar" : formatPrice(DELIVERY_FEE)}
+                        </span>
                       </div>
                       <div className="flex items-center justify-between text-base font-bold pt-2 border-t border-border">
-                        <span className="text-foreground">Total</span>
-                        <span className="text-primary">{formatPrice(cartTotal(cart) + (deliveryMode === "delivery" ? DELIVERY_FEE : 0))}</span>
+                        <span className="text-foreground">Total{isFarDelivery ? " (frete à parte)" : ""}</span>
+                        <span className="text-primary">{formatPrice(orderGrandTotal)}</span>
                       </div>
                     </div>
 
@@ -698,7 +730,7 @@ export function CartDrawer({
                       </div>
                     )}
 
-                    {isPaymentConfigured() && (
+                    {isPaymentConfigured() && !isFarDelivery && (
                       <button onClick={goToPaymentStep}
                         className="mt-2 py-4 bg-primary text-primary-foreground font-bold tracking-widest uppercase text-sm hover:brightness-110 transition-all flex items-center justify-center gap-2">
                         <ShoppingBag size={16} /> Pagar agora (Pix ou Cartão)
@@ -707,12 +739,12 @@ export function CartDrawer({
 
                     <button onClick={confirmDeliveryPaymentAndCheckout}
                       className={
-                        isPaymentConfigured()
+                        isPaymentConfigured() && !isFarDelivery
                           ? "py-3 border border-border text-foreground text-xs tracking-widest uppercase font-semibold hover:border-primary hover:text-primary transition-colors flex items-center justify-center gap-2"
                           : "mt-2 py-4 bg-primary text-primary-foreground font-bold tracking-widest uppercase text-sm hover:brightness-110 transition-all flex items-center justify-center gap-2"
                       }>
                       <ShoppingBag size={16} />
-                      {isPaymentConfigured() ? "Pagar na entrega (dinheiro ou maquininha)" : "Confirmar pedido pelo WhatsApp"}
+                      {isPaymentConfigured() && !isFarDelivery ? "Pagar na entrega (dinheiro ou maquininha)" : "Confirmar pedido pelo WhatsApp"}
                     </button>
                   </div>
                 </div>
@@ -726,6 +758,25 @@ export function CartDrawer({
                     onApproved={(info) => handleCheckout(info)}
                     onCancel={() => setStep("address")}
                   />
+                </div>
+              )}
+
+              {step === "farNotice" && (
+                <div className="flex-1 flex flex-col overflow-y-auto">
+                  <div className="flex flex-col gap-4 items-center text-center py-4">
+                    <CheckCircle2 size={36} className="text-primary" />
+                    <p className="text-foreground text-base leading-relaxed">
+                      Seu pedido foi emitido normalmente. Como seu endereço fica a mais de {FAR_DELIVERY_KM_THRESHOLD} km do
+                      restaurante, precisamos alinhar o valor do frete com nossos parceiros de entrega antes de confirmar —
+                      assim que possível, retornamos por aqui (WhatsApp) com o valor certinho.
+                    </p>
+                    <p className="text-muted-foreground text-sm">Agradecemos desde já pela compreensão! 🙏</p>
+
+                    <button onClick={handleClose}
+                      className="w-full mt-2 py-3 bg-primary text-primary-foreground text-xs tracking-widest uppercase font-bold hover:brightness-110 transition-all">
+                      Entendi
+                    </button>
+                  </div>
                 </div>
               )}
             </motion.div>

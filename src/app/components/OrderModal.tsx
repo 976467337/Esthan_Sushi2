@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { X, Minus, Plus, ShoppingBag, CheckCircle2, CupSoda } from "lucide-react";
+import { X, Minus, Plus, ShoppingBag, CheckCircle2, CupSoda, Expand } from "lucide-react";
 import { EXTRAS, DRINKS, FREE_SAUCE_NAMES, EXTRA_SAUCE_FEE, parsePrice, formatPrice, type CartLine, type Drink } from "@/app/cart-data";
+import { ImageLightbox } from "@/app/components/ImageLightbox";
 
-type MenuItem = { name: string; price: string };
+type MenuItem = { name: string; price: string; img?: string };
 
 export function OrderModal({
   item,
@@ -18,6 +19,7 @@ export function OrderModal({
   const [qty, setQty] = useState(1);
   const [extras, setExtras] = useState<string[]>([]);
   const [addedDrink, setAddedDrink] = useState<string | null>(null);
+  const [showPhoto, setShowPhoto] = useState(false);
 
   useEffect(() => {
     if (item) {
@@ -77,6 +79,16 @@ export function OrderModal({
 
           {step === "item" && (
             <>
+              {item.img && (
+                <button type="button" onClick={() => setShowPhoto(true)}
+                  className="relative w-full aspect-[4/3] bg-secondary rounded overflow-hidden mb-6 group">
+                  <img src={item.img} alt={item.name} className="w-full h-full object-contain" />
+                  <span className="absolute bottom-2 right-2 bg-black/60 text-white text-[10px] tracking-widest uppercase px-2 py-1 rounded flex items-center gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
+                    <Expand size={12} /> Ampliar
+                  </span>
+                </button>
+              )}
+
               <div className="flex items-center justify-between mb-6">
                 <span className="text-muted-foreground text-xs tracking-widest uppercase">Quantidade</span>
                 <div className="flex items-center gap-4 border border-border px-3 py-2">
@@ -177,6 +189,15 @@ export function OrderModal({
           )}
         </motion.div>
       </motion.div>
+
+      {showPhoto && item.img && (
+        <ImageLightbox
+          images={[{ src: item.img, alt: item.name }]}
+          index={0}
+          onClose={() => setShowPhoto(false)}
+          onNavigate={() => {}}
+        />
+      )}
     </AnimatePresence>
   );
 }
