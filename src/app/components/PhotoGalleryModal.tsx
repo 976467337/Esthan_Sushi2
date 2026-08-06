@@ -67,9 +67,11 @@ export function PhotoGalleryModal({ open, onClose }: { open: boolean; onClose: (
                         <button
                           key={item.name}
                           onClick={() => setLightboxIndex(globalIndex)}
-                          className="aspect-square bg-black overflow-hidden rounded border border-border hover:border-primary/40 transition-colors"
+                          className="relative aspect-square bg-black overflow-hidden rounded border border-border hover:border-primary/40 transition-colors"
                         >
-                          <img src={item.img} alt={item.name} className="w-full h-full object-contain" />
+                          <img src={item.img} alt="" aria-hidden="true"
+                            className="absolute inset-0 w-full h-full object-cover scale-110 blur-lg brightness-50" />
+                          <img src={item.img} alt={item.name} className="relative w-full h-full object-contain" />
                         </button>
                       );
                     })}
