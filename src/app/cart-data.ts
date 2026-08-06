@@ -18,23 +18,25 @@ export const EXTRAS = [
 export const FREE_SAUCE_NAMES = ["Shoyu", "Gengibre", "Wasabi"];
 export const EXTRA_SAUCE_FEE = 2;
 
-// preços placeholder — ajuste os valores reais antes de publicar
+// preços placeholder (cerveja e Red Bull) — ajuste os valores reais antes de publicar.
+// Refrigerantes em lata já confirmados em R$ 7 pelo dono.
 export const DRINKS = [
+  { name: "Itubaina Lata 350ml", price: 7 },
   { name: "Coca-Cola Lata 350ml", price: 7 },
   { name: "Coca-Cola Zero Lata 350ml", price: 7 },
-  { name: "Coca-Cola Garrafa 600ml", price: 10 },
-  { name: "Coca-Cola Zero Garrafa 600ml", price: 10 },
+  { name: "Fanta Laranja Lata 350ml", price: 7 },
+  { name: "Fanta Uva Lata 350ml", price: 7 },
   { name: "Guaraná Antarctica Lata 350ml", price: 7 },
   { name: "Guaraná Antarctica Zero Lata 350ml", price: 7 },
-  { name: "Guaraná Antarctica Garrafa 600ml", price: 10 },
-  { name: "Guaraná Antarctica Zero Garrafa 600ml", price: 10 },
+  { name: "Skol Lata 350ml", price: 9 },
+  { name: "Heineken Lata 350ml", price: 9 },
   { name: "Água Mineral 500ml", price: 4 },
   { name: "Suco de Uva 300ml", price: 7 },
   { name: "Del Valle Uva Lata 290ml", price: 6 },
   { name: "Del Valle Maçã Lata 290ml", price: 6 },
   { name: "Del Valle Néctar de Manga Lata 290ml", price: 6 },
   { name: "Del Valle Frutas Vermelhas Lata 290ml", price: 6 },
-  { name: "Heineken Long Neck", price: 9 },
+  { name: "Red Bull Energético 250ml", price: 12 },
 ];
 
 export const DELIVERY_FEE = 7;
