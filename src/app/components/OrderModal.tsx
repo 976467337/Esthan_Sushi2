@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { X, Minus, Plus, ShoppingBag, CheckCircle2 } from "lucide-react";
-import { EXTRAS, DRINKS, FREE_SAUCE_NAMES, EXTRA_SAUCE_FEE, parsePrice, formatPrice, type CartLine } from "@/app/cart-data";
+import { X, Minus, Plus, ShoppingBag, CheckCircle2, CupSoda } from "lucide-react";
+import { EXTRAS, DRINKS, FREE_SAUCE_NAMES, EXTRA_SAUCE_FEE, parsePrice, formatPrice, type CartLine, type Drink } from "@/app/cart-data";
 
 type MenuItem = { name: string; price: string };
 
@@ -39,7 +39,7 @@ export function OrderModal({
     setStep("upsell");
   };
 
-  const addDrink = (drink: { name: string; price: number }) => {
+  const addDrink = (drink: Drink) => {
     onAddLine({ id: crypto.randomUUID(), name: drink.name, unitPrice: drink.price, qty: 1 });
     setAddedDrink(drink.name);
     setTimeout(() => onClose(), 1100);
@@ -149,13 +149,20 @@ export function OrderModal({
                 <div className="flex flex-col gap-2 mb-6">
                   {DRINKS.map((drink) => (
                     <div key={drink.name}
-                      className="flex items-center justify-between gap-3 border border-border px-4 py-3">
-                      <div>
+                      className="flex items-center gap-3 border border-border px-4 py-3">
+                      {drink.img ? (
+                        <img src={drink.img} alt={drink.name} className="w-12 h-12 object-cover rounded-sm flex-shrink-0" />
+                      ) : (
+                        <span className="w-12 h-12 flex items-center justify-center bg-input-background text-muted-foreground flex-shrink-0">
+                          <CupSoda size={20} />
+                        </span>
+                      )}
+                      <div className="flex-1 min-w-0">
                         <p className="text-foreground text-sm">{drink.name}</p>
                         <p className="text-muted-foreground text-xs">{formatPrice(drink.price)}</p>
                       </div>
                       <button onClick={() => addDrink(drink)}
-                        className="px-3 py-1.5 border border-primary/40 text-primary text-xs tracking-widest uppercase font-semibold hover:bg-primary/10 transition-colors">
+                        className="px-3 py-1.5 border border-primary/40 text-primary text-xs tracking-widest uppercase font-semibold hover:bg-primary/10 transition-colors flex-shrink-0">
                         Adicionar
                       </button>
                     </div>

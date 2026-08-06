@@ -31,6 +31,7 @@ import imgUramakiCalifornia from "@/imports/pratos/uramaki-california.jpeg";
 import imgUramakiSalmao from "@/imports/pratos/uramaki-salmao.jpeg";
 import imgUramakiFiladelfia from "@/imports/pratos/uramaki-filadelfia.jpeg";
 import imgSushiFiladelfia from "@/imports/pratos/sushi-filadelfia.jpeg";
+import imgUramakiSkin from "@/imports/pratos/uramaki-skin.jpeg";
 
 export type MenuItem = {
   name: string;
@@ -96,9 +97,9 @@ export const URAMAKIS: MenuItem[] = [
   { name: "Sushi Filadélfia", desc: "Arroz, salmão, cream cheese e cebolinha · 8 unidades", price: "R$ 24,90", img: imgSushiFiladelfia },
   { name: "Sushi Uramaki Califórnia", desc: "Arroz com gergilim, kani, manga e pepino · 8 unidades", price: "R$ 24,90", img: imgUramakiCalifornia },
   { name: "Sushi Uramaki Filadélfia", desc: "Arroz com gergilim, cream cheese e cebolinha · 8 unidades", price: "R$ 25,90", img: imgUramakiFiladelfia },
-  { name: "Sushi Uramaki Skin", desc: "Arroz com gergilim, pele de salmão frita, cream cheese e cebolinha · 8 unidades", price: "R$ 22,90" },
+  { name: "Sushi Uramaki Skin", desc: "Arroz com gergilim, pele de salmão frita, cream cheese e cebolinha · 8 unidades", price: "R$ 22,90", img: imgUramakiSkin },
   { name: "Uramaki Salmão", desc: "Arroz com gergelim e salmão · 8 unidades", price: "R$ 17,90", img: imgUramakiSalmao },
-  { name: "Uramaki Skin", desc: "Arroz com gergelim, pele de salmão frita, cream cheese e cebolinha · 8 unidades", price: "R$ 22,90" },
+  { name: "Uramaki Skin", desc: "Arroz com gergelim, pele de salmão frita, cream cheese e cebolinha · 8 unidades", price: "R$ 22,90", img: imgUramakiSkin },
   { name: "Hossomaki de Pepino", desc: "Arroz e pepino · 6 unidades", price: "R$ 12,90", img: imgHossomakiPepino },
   { name: "Hossomaki de Salmão", desc: "Arroz e salmão · 6 unidades", price: "R$ 16,90", img: imgHossomakiSalmao },
 ];

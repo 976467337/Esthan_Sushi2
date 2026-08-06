@@ -1,3 +1,9 @@
+// fotos reais das bebidas (algumas ainda sem foto — aparecem com ícone genérico até o
+// dono mandar fotos das latas específicas, ver comentário no array DRINKS mais abaixo)
+import imgGuaranaAntarctica from "@/imports/bebidas/guarana-antarctica.jpg";
+import imgRedBull from "@/imports/bebidas/red-bull.jpg";
+import imgHeineken from "@/imports/bebidas/heineken.jpg";
+
 export type CartLine = {
   id: string;
   name: string;
@@ -20,23 +26,28 @@ export const EXTRA_SAUCE_FEE = 2;
 
 // preços placeholder (cerveja e Red Bull) — ajuste os valores reais antes de publicar.
 // Refrigerantes em lata já confirmados em R$ 7 pelo dono.
-export const DRINKS = [
+// `img` é opcional — enquanto não tivermos foto real de cada lata, o card aparece
+// só com o nome (ver DrinkThumb em OrderModal.tsx). Assim que o dono mandar as
+// fotos das bebidas, é só importar e preencher aqui, igual foi feito com os pratos.
+export type Drink = { name: string; price: number; img?: string };
+
+export const DRINKS: Drink[] = [
   { name: "Itubaina Lata 350ml", price: 7 },
   { name: "Coca-Cola Lata 350ml", price: 7 },
   { name: "Coca-Cola Zero Lata 350ml", price: 7 },
   { name: "Fanta Laranja Lata 350ml", price: 7 },
   { name: "Fanta Uva Lata 350ml", price: 7 },
-  { name: "Guaraná Antarctica Lata 350ml", price: 7 },
+  { name: "Guaraná Antarctica Lata 350ml", price: 7, img: imgGuaranaAntarctica },
   { name: "Guaraná Antarctica Zero Lata 350ml", price: 7 },
   { name: "Skol Lata 350ml", price: 9 },
-  { name: "Heineken Lata 350ml", price: 9 },
+  { name: "Heineken Lata 350ml", price: 9, img: imgHeineken },
   { name: "Água Mineral 500ml", price: 4 },
   { name: "Suco de Uva 300ml", price: 7 },
   { name: "Del Valle Uva Lata 290ml", price: 6 },
   { name: "Del Valle Maçã Lata 290ml", price: 6 },
   { name: "Del Valle Néctar de Manga Lata 290ml", price: 6 },
   { name: "Del Valle Frutas Vermelhas Lata 290ml", price: 6 },
-  { name: "Red Bull Energético 250ml", price: 12 },
+  { name: "Red Bull Energético 250ml", price: 12, img: imgRedBull },
 ];
 
 export const DELIVERY_FEE = 7;

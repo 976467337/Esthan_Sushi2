@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { X, Minus, Plus, Trash2, ShoppingBag, Loader2, CheckCircle2, AlertCircle, ArrowLeft, Heart, Clock } from "lucide-react";
-import { cartTotal, formatPrice, lineTotal, DELIVERY_FEE, DELIVERY_PAYMENT_METHODS, type CartLine, type DeliveryMode, type PaymentInfo, type DeliveryPaymentMethod } from "@/app/cart-data";
+import { cartTotal, formatPrice, parsePrice, lineTotal, DELIVERY_FEE, DELIVERY_PAYMENT_METHODS, type CartLine, type DeliveryMode, type PaymentInfo, type DeliveryPaymentMethod } from "@/app/cart-data";
 import { geocodeAddress, estimateDelivery, lookupCep, RESTAURANT_ADDRESS, FALLBACK_TOTAL_MINUTES, type CepResult } from "@/app/delivery";
 import { isWithinBusinessHours, nextOpeningLabel } from "@/app/business-hours";
 import { isPaymentConfigured } from "@/app/payments";
@@ -207,6 +207,16 @@ export function CartDrawer({
   };
 
   const handleCheckout = (paymentInfo?: PaymentInfo) => {
+    let changeInfo: string | undefined;
+    if (deliveryPaymentMethod === "Dinheiro") {
+      if (needsChange) {
+        const givenAmount = parsePrice(changeForAmount);
+        const changeDue = givenAmount - orderGrandTotal;
+        changeInfo = `Precisa de troco para: ${changeForAmount.trim()} (levar ${formatPrice(Math.max(0, changeDue))} de troco)`;
+      } else {
+        changeInfo = "Não precisa de troco";
+      }
+    }
     onCheckout(
       customerName.trim(),
       deliveryMode!,
@@ -215,11 +225,7 @@ export function CartDrawer({
       scheduled ? nextOpeningLabel() : undefined,
       paymentInfo,
       deliveryPaymentMethod ?? undefined,
-      deliveryPaymentMethod === "Dinheiro"
-        ? needsChange
-          ? `Precisa de troco para: ${changeForAmount.trim()}`
-          : "Não precisa de troco"
-        : undefined
+      changeInfo
     );
     setCustomerName("");
     setScheduled(false);
@@ -236,9 +242,16 @@ export function CartDrawer({
         setChangeError(true);
         return;
       }
-      if (needsChange && !changeForAmount.trim()) {
-        setChangeError(true);
-        return;
+      if (needsChange) {
+        if (!changeForAmount.trim()) {
+          setChangeError(true);
+          return;
+        }
+        const givenAmount = parsePrice(changeForAmount);
+        if (!givenAmount || givenAmount < orderGrandTotal) {
+          setChangeError(true);
+          return;
+        }
       }
     }
     handleCheckout();
@@ -655,16 +668,31 @@ export function CartDrawer({
                           </button>
                         </div>
                         {needsChange && (
-                          <input
-                            value={changeForAmount}
-                            onChange={(e) => { setChangeForAmount(e.target.value); setChangeError(false); }}
-                            placeholder="Troco para quanto? Ex: R$ 100,00"
-                            className="w-full bg-input-background border border-border px-3 py-2.5 text-sm text-foreground focus:border-primary outline-none transition-colors"
-                          />
+                          <>
+                            <input
+                              value={changeForAmount}
+                              onChange={(e) => { setChangeForAmount(e.target.value); setChangeError(false); }}
+                              placeholder="Troco para quanto? Ex: R$ 100,00"
+                              className="w-full bg-input-background border border-border px-3 py-2.5 text-sm text-foreground focus:border-primary outline-none transition-colors"
+                            />
+                            {(() => {
+                              const givenAmount = parsePrice(changeForAmount);
+                              if (!changeForAmount.trim() || !givenAmount || givenAmount < orderGrandTotal) return null;
+                              return (
+                                <p className="text-primary text-xs">
+                                  Levar {formatPrice(givenAmount - orderGrandTotal)} de troco
+                                </p>
+                              );
+                            })()}
+                          </>
                         )}
                         {changeError && (
                           <p className="text-destructive text-xs">
-                            {needsChange === null ? "Escolha se vai precisar de troco." : "Informa pra quanto precisa do troco."}
+                            {needsChange === null
+                              ? "Escolha se vai precisar de troco."
+                              : !changeForAmount.trim()
+                              ? "Informa pra quanto precisa do troco."
+                              : "O valor precisa ser maior que o total do pedido."}
                           </p>
                         )}
                       </div>
