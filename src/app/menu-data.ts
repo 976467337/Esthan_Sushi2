@@ -14,6 +14,8 @@ import imgCombinadoTemakiNiguiri from "@/imports/pratos/combinado-temaki-niguiri
 import imgCombinadoTemakiSashimi from "@/imports/pratos/combinado-temaki-sashimi.jpeg";
 import imgCombinadoTemakiHot from "@/imports/pratos/combinado-temaki-hot.jpeg";
 import imgCombinadoSushiUramaki from "@/imports/pratos/combinado-sushi-uramaki.jpeg";
+// foto provisória do Sushi do Cabeça (parceiro) até tirarmos uma foto própria deste prato
+import imgCombinadoMistoHossomaki from "@/imports/pratos/combinado-misto-hossomaki.jpeg";
 import imgTemakiHot from "@/imports/pratos/temaki-hot.jpeg";
 import imgTemakiGrill from "@/imports/pratos/temaki-grill.jpeg";
 import imgTemakiSkin from "@/imports/pratos/temaki-skin.jpeg";
@@ -66,7 +68,7 @@ export const COMBINADOS: MenuItem[] = [
   { name: "Combinado Hot + Filadélfia", desc: "4 Hot Roll Salmão · 4 Sushi Filadélfia", price: "R$ 25,90" },
   { name: "Combinado Joy", desc: "04 Joy Salmão · 04 Joy Pepino · 04 Joy Salmão Grelhado", price: "R$ 58,90", img: imgCombinadoJoy },
   { name: "Combinado Joy + Niguiri", desc: "04 Joy Salmão · 04 Niguiri", price: "R$ 28,90", img: imgCombinadoJoyNiguiri },
-  { name: "Combinado Misto Hossomaki", desc: "6 Hossomaki Skin · 6 Hossomaki Pepino · 6 Hossomaki Kani · 6 Mini Hot Roll · 6 Uramaki Salmão · 6 Hossomaki Salmão", price: "R$ 79,90" },
+  { name: "Combinado Misto Hossomaki", desc: "6 Hossomaki Skin · 6 Hossomaki Pepino · 6 Hossomaki Kani · 6 Mini Hot Roll · 6 Uramaki Salmão · 6 Hossomaki Salmão", price: "R$ 79,90", img: imgCombinadoMistoHossomaki },
   { name: "Combinado Nachos", desc: "1 Temaki Salmão Grelhado · 4 Hot Roll Doritos Especial", price: "R$ 42,90" },
   { name: "Combinado Sushi Uramaki", desc: "08 Uramaki Filadélfia · 08 Uramaki Califórnia · 06 Uramaki Skin", price: "R$ 59,90", img: imgCombinadoSushiUramaki },
   { name: "Combinado Temaki + Hot", desc: "01 Temaki Salmão · 04 Hot Roll", price: "R$ 39,90", img: imgCombinadoTemakiHot },
