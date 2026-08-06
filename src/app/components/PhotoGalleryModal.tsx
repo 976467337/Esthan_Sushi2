@@ -67,7 +67,7 @@ export function PhotoGalleryModal({ open, onClose }: { open: boolean; onClose: (
                         <button
                           key={item.name}
                           onClick={() => setLightboxIndex(globalIndex)}
-                          className="aspect-square bg-secondary overflow-hidden rounded border border-border hover:border-primary/40 transition-colors"
+                          className="aspect-square bg-black overflow-hidden rounded border border-border hover:border-primary/40 transition-colors"
                         >
                           <img src={item.img} alt={item.name} className="w-full h-full object-contain" />
                         </button>

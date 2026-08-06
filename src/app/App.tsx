@@ -63,7 +63,7 @@ function ListItem({ name, desc, price, oldPrice, img, onSelect }: { name: string
       onClick={onSelect}
       className="w-full flex items-center gap-4 py-4 border-b border-border group hover:bg-card/40 px-2 -mx-2 transition-colors rounded text-left"
     >
-      <div className="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 overflow-hidden rounded bg-secondary">
+      <div className="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 overflow-hidden rounded bg-black">
         {img ? (
           <ImageWithFallback src={img} alt={name} className="w-full h-full object-contain object-center" />
         ) : (

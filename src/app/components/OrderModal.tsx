@@ -81,7 +81,7 @@ export function OrderModal({
             <>
               {item.img && (
                 <button type="button" onClick={() => setShowPhoto(true)}
-                  className="relative w-full aspect-[4/3] bg-secondary rounded overflow-hidden mb-6 group">
+                  className="relative w-full aspect-[4/3] bg-black rounded overflow-hidden mb-6 group">
                   <img src={item.img} alt={item.name} className="w-full h-full object-contain" />
                   <span className="absolute bottom-2 right-2 bg-black/60 text-white text-[10px] tracking-widest uppercase px-2 py-1 rounded flex items-center gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
                     <Expand size={12} /> Ampliar
