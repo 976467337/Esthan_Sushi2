@@ -14,7 +14,7 @@ import imgCombinadoTemakiNiguiri from "@/imports/pratos/combinado-temaki-niguiri
 import imgCombinadoTemakiSashimi from "@/imports/pratos/combinado-temaki-sashimi.jpeg";
 import imgCombinadoNachos from "@/imports/pratos/combinado-nachos.jpeg";
 import imgTemakiHot from "@/imports/pratos/temaki-hot.jpeg";
-import imgTemakiSalmaoCompleto from "@/imports/pratos/temaki-salmao-completo.jpeg";
+import imgTemakiGrill from "@/imports/pratos/temaki-grill.jpeg";
 import imgTemakiSkin from "@/imports/pratos/temaki-skin.jpeg";
 import imgHotRollSalmao from "@/imports/pratos/hot-roll-salmao.jpeg";
 import imgSashimi from "@/imports/pratos/sashimi.jpeg";
@@ -73,9 +73,9 @@ export const COMBINADOS: MenuItem[] = [
 
 export const TEMAKIS: MenuItem[] = [
   { name: "Temaki Califórnia", desc: "Arroz, kani, manga e pepino", price: "R$ 26,90" },
-  { name: "Temaki Grill", desc: "Arroz, salmão grelhado, cream cheese e cebolinha", price: "R$ 29,90" },
+  { name: "Temaki Grill", desc: "Arroz, salmão grelhado, cream cheese e cebolinha", price: "R$ 29,90", img: imgTemakiGrill },
   { name: "Temaki Hot", desc: "Salmão, cream cheese, cebolinha, arroz e panko", price: "R$ 31,90", img: imgTemakiHot },
-  { name: "Temaki Salmão Completo", desc: "Arroz, salmão, cream cheese e cebolinha", price: "R$ 28,90", img: imgTemakiSalmaoCompleto },
+  { name: "Temaki Salmão Completo", desc: "Arroz, salmão, cream cheese e cebolinha", price: "R$ 28,90" },
   { name: "Temaki Skin", desc: "Arroz, pele de salmão frita e cream cheese", price: "R$ 25,90", img: imgTemakiSkin },
 ];
 
