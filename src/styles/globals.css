@@ -50,6 +50,13 @@
   color: transparent;
 }
 
+/* Fundo dos quadros de foto (cardápio/galeria) — usado com object-contain, quando a
+   proporção da foto não preenche o quadro. Um brilho sutil da cor da marca em vez de
+   preto liso "morto", funciona bem independente da cor de fundo da própria foto. */
+.photo-frame-bg {
+  background: radial-gradient(circle at 50% 42%, rgba(226, 22, 13, 0.22) 0%, rgba(10, 7, 5, 0.98) 72%);
+}
+
 .glow-pulse {
   animation: glow-pulse 3.5s ease-in-out infinite;
 }

@@ -615,7 +615,10 @@ export function CartDrawer({
                       <div className="border border-border px-4 py-4">
                         <p className="text-muted-foreground text-xs tracking-widest uppercase mb-1">Tempo estimado de entrega</p>
                         <p className="text-primary text-2xl font-black" style={{ fontFamily: "'Orbitron', sans-serif" }}>~{etaMinutes} min</p>
-                        <p className="text-muted-foreground text-xs mt-1">Já incluindo o preparo do pedido</p>
+                        <p className="text-muted-foreground text-xs mt-1">
+                          Já incluindo o preparo do pedido
+                          {distanceKm != null && ` · Distância calculada: ~${String(distanceKm).replace(".", ",")} km`}
+                        </p>
                       </div>
                     )}
 

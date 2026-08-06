@@ -63,13 +63,9 @@ function ListItem({ name, desc, price, oldPrice, img, onSelect }: { name: string
       onClick={onSelect}
       className="w-full flex items-center gap-4 py-4 border-b border-border group hover:bg-card/40 px-2 -mx-2 transition-colors rounded text-left"
     >
-      <div className="relative w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 overflow-hidden rounded bg-black">
+      <div className="photo-frame-bg w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 overflow-hidden rounded">
         {img ? (
-          <>
-            <img src={img} alt="" aria-hidden="true"
-              className="absolute inset-0 w-full h-full object-cover scale-110 blur-lg brightness-50" />
-            <ImageWithFallback src={img} alt={name} className="relative w-full h-full object-contain object-center" />
-          </>
+          <ImageWithFallback src={img} alt={name} className="w-full h-full object-contain object-center" />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
             <UtensilsCrossed size={20} className="text-muted-foreground/40" />
