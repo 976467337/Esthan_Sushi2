@@ -32,6 +32,8 @@ import imgUramakiSalmao from "@/imports/pratos/uramaki-salmao.jpeg";
 import imgUramakiFiladelfia from "@/imports/pratos/uramaki-filadelfia.jpeg";
 import imgSushiFiladelfia from "@/imports/pratos/sushi-filadelfia.jpeg";
 import imgUramakiSkin from "@/imports/pratos/uramaki-skin.jpeg";
+// foto usada só na seção "Sobre" (vista de cima de uma barca completa)
+import imgBarcaSobre from "@/imports/pratos/barca-sobre.jpeg";
 
 export type MenuItem = {
   name: string;
@@ -140,5 +142,5 @@ export const MENU_CATEGORIES: { title: string; items: MenuItem[] }[] = [
 
 export const ALL_MENU_ITEMS: MenuItem[] = MENU_CATEGORIES.flatMap((c) => c.items);
 
-// reaproveitada na seção "Sobre" do site (substitui uma foto de banco de imagens antiga)
-export { imgBarcaSalmao };
+// foto usada na seção "Sobre" do site
+export { imgBarcaSobre };

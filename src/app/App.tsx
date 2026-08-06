@@ -8,7 +8,7 @@ import { CartDrawer } from "@/app/components/CartDrawer";
 import { buildOrderMessage, type CartLine, type DeliveryMode, type PaymentInfo, type DeliveryPaymentMethod } from "@/app/cart-data";
 import logoFull from "@/imports/logo-transparent.png";
 import logoIcon from "@/imports/logo-mark.png";
-import { BARCAS, COMBINADOS, TEMAKIS, HOT_ROLLS, URAMAKIS, HOSSOMAKIS_OUTROS, DEFAULT_PROMO_CONFIG, ALL_MENU_ITEMS, imgBarcaSalmao, type MenuItem } from "@/app/menu-data";
+import { BARCAS, COMBINADOS, TEMAKIS, HOT_ROLLS, URAMAKIS, HOSSOMAKIS_OUTROS, DEFAULT_PROMO_CONFIG, ALL_MENU_ITEMS, imgBarcaSobre, type MenuItem } from "@/app/menu-data";
 
 const WHATSAPP_NUMBER = "5511994597259";
 
@@ -463,7 +463,7 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <div className="relative">
             <div className="aspect-square overflow-hidden bg-secondary">
-              <ImageWithFallback src={imgBarcaSalmao}
+              <ImageWithFallback src={imgBarcaSobre}
                 alt="Sushi fresco preparado por Esthan Sushi" className="w-full h-full object-cover" />
             </div>
             <div className="absolute -bottom-6 -right-6 w-40 h-40 bg-primary flex-col items-center justify-center text-center p-4 hidden lg:flex">
