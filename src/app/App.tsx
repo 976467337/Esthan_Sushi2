@@ -8,7 +8,7 @@ import { CartDrawer } from "@/app/components/CartDrawer";
 import { buildOrderMessage, type CartLine, type DeliveryMode, type PaymentInfo, type DeliveryPaymentMethod } from "@/app/cart-data";
 import logoFull from "@/imports/logo-transparent.png";
 import logoIcon from "@/imports/logo-mark.png";
-import { BARCAS, COMBINADOS, TEMAKIS, HOT_ROLLS, URAMAKIS, HOSSOMAKIS_OUTROS, DEFAULT_PROMO_CONFIG, ALL_MENU_ITEMS, type MenuItem } from "@/app/menu-data";
+import { BARCAS, COMBINADOS, TEMAKIS, HOT_ROLLS, URAMAKIS, HOSSOMAKIS_OUTROS, DEFAULT_PROMO_CONFIG, ALL_MENU_ITEMS, imgBarcaSalmao, type MenuItem } from "@/app/menu-data";
 
 const WHATSAPP_NUMBER = "5511994597259";
 
@@ -205,8 +205,8 @@ export default function App() {
     { id: "promocoes", label: "Promoções", icon: <Tag size={12} /> },
     { id: "temakis", label: "Temakis", icon: <IceCreamCone size={12} /> },
     { id: "hotrolls", label: "Hot Rolls", icon: <Flame size={12} /> },
-    { id: "uramakis", label: "Uramakis", icon: <Disc size={12} /> },
-    { id: "outros", label: "Outros", icon: <Sparkles size={12} /> },
+    { id: "uramakis", label: "Sushi/Uramaki/Hossomaki", icon: <Disc size={12} /> },
+    { id: "outros", label: "Joy, Niguiri e Sashimi", icon: <Sparkles size={12} /> },
   ];
 
   // depoimentos aprovados são os mais recentes (o Worker já devolve os mais novos
@@ -356,8 +356,8 @@ export default function App() {
                 { title: "Promoções", items: PROMOCOES },
                 { title: "Temakis", items: TEMAKIS },
                 { title: "Hot Rolls", items: HOT_ROLLS },
-                { title: "Uramakis", items: URAMAKIS },
-                { title: "Outros", items: HOSSOMAKIS_OUTROS },
+                { title: "Sushi/Uramaki/Hossomaki", items: URAMAKIS },
+                { title: "Joy, Niguiri e Sashimi", items: HOSSOMAKIS_OUTROS },
               ].filter((section) => section.items.length > 0).map((section) => (
                 <div key={section.title}>
                   <h3 className="text-gradient text-2xl md:text-3xl font-black mb-4" style={{ fontFamily: "'Orbitron', sans-serif" }}>
@@ -439,7 +439,7 @@ export default function App() {
           {/* URAMAKIS */}
           {activeTab === "uramakis" && (
             <div className="max-w-3xl mx-auto">
-              <SectionHeader label="Sabor e sofisticação em cada detalhe!" title="URAMAKIS" />
+              <SectionHeader label="Sabor e sofisticação em cada detalhe!" title="URAMAKIS & HOSSOMAKI" />
               <div className="divide-y divide-border">
                 {URAMAKIS.map((item) => <ListItem key={item.name} {...item} onSelect={() => setActiveMenuItem(item)} />)}
               </div>
@@ -449,7 +449,7 @@ export default function App() {
           {/* OUTROS */}
           {activeTab === "outros" && (
             <div className="max-w-3xl mx-auto">
-              <SectionHeader label="Hossomakis, Joy, Niguiri e Sashimi" title="OUTROS" />
+              <SectionHeader label="Joy, Niguiri e Sashimi" title="OUTROS" />
               <div className="divide-y divide-border">
                 {HOSSOMAKIS_OUTROS.map((item) => <ListItem key={item.name} {...item} onSelect={() => setActiveMenuItem(item)} />)}
               </div>
@@ -463,7 +463,7 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <div className="relative">
             <div className="aspect-square overflow-hidden bg-secondary">
-              <ImageWithFallback src="https://images.unsplash.com/photo-1709984110217-57d7d18e5299?w=800&h=800&fit=crop&auto=format"
+              <ImageWithFallback src={imgBarcaSalmao}
                 alt="Sushi fresco preparado por Esthan Sushi" className="w-full h-full object-cover" />
             </div>
             <div className="absolute -bottom-6 -right-6 w-40 h-40 bg-primary flex-col items-center justify-center text-center p-4 hidden lg:flex">

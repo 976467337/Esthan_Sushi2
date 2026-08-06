@@ -12,11 +12,15 @@ import imgCombinadoJoyNiguiri from "@/imports/pratos/combinado-joy-niguiri.jpeg"
 import imgCombinadoTemakiJoy from "@/imports/pratos/combinado-temaki-joy.jpeg";
 import imgCombinadoTemakiNiguiri from "@/imports/pratos/combinado-temaki-niguiri.jpeg";
 import imgCombinadoTemakiSashimi from "@/imports/pratos/combinado-temaki-sashimi.jpeg";
-import imgCombinadoNachos from "@/imports/pratos/combinado-nachos.jpeg";
+import imgCombinadoTemakiHot from "@/imports/pratos/combinado-temaki-hot.jpeg";
+import imgCombinadoSushiUramaki from "@/imports/pratos/combinado-sushi-uramaki.jpeg";
 import imgTemakiHot from "@/imports/pratos/temaki-hot.jpeg";
 import imgTemakiGrill from "@/imports/pratos/temaki-grill.jpeg";
 import imgTemakiSkin from "@/imports/pratos/temaki-skin.jpeg";
+import imgTemakiCalifornia from "@/imports/pratos/temaki-california.jpeg";
 import imgHotRollSalmao from "@/imports/pratos/hot-roll-salmao.jpeg";
+import imgHotRollDoritosEspecial from "@/imports/pratos/hot-roll-doritos-especial.jpeg";
+import imgHotRollEspecial from "@/imports/pratos/hot-roll-especial.jpeg";
 import imgSashimi from "@/imports/pratos/sashimi.jpeg";
 import imgHossomakiPepino from "@/imports/pratos/hossomaki-pepino.jpeg";
 import imgHossomakiSalmao from "@/imports/pratos/hossomaki-salmao.jpeg";
@@ -24,6 +28,7 @@ import imgJoySalmao from "@/imports/pratos/joy-salmao.jpeg";
 import imgUramakiCalifornia from "@/imports/pratos/uramaki-california.jpeg";
 import imgUramakiSalmao from "@/imports/pratos/uramaki-salmao.jpeg";
 import imgUramakiFiladelfia from "@/imports/pratos/uramaki-filadelfia.jpeg";
+import imgSushiFiladelfia from "@/imports/pratos/sushi-filadelfia.jpeg";
 
 export type MenuItem = {
   name: string;
@@ -62,9 +67,9 @@ export const COMBINADOS: MenuItem[] = [
   { name: "Combinado Joy", desc: "04 Joy Salmão · 04 Joy Pepino · 04 Joy Salmão Grelhado", price: "R$ 58,90", img: imgCombinadoJoy },
   { name: "Combinado Joy + Niguiri", desc: "04 Joy Salmão · 04 Niguiri", price: "R$ 28,90", img: imgCombinadoJoyNiguiri },
   { name: "Combinado Misto Hossomaki", desc: "6 Hossomaki Skin · 6 Hossomaki Pepino · 6 Hossomaki Kani · 6 Mini Hot Roll · 6 Uramaki Salmão · 6 Hossomaki Salmão", price: "R$ 79,90" },
-  { name: "Combinado Nachos", desc: "1 Temaki Salmão Grelhado · 4 Hot Roll Doritos Especial", price: "R$ 42,90", img: imgCombinadoNachos },
-  { name: "Combinado Sushi Uramaki", desc: "08 Uramaki Filadélfia · 08 Uramaki Califórnia · 06 Uramaki Skin", price: "R$ 59,90" },
-  { name: "Combinado Temaki + Hot", desc: "01 Temaki Salmão · 04 Hot Roll", price: "R$ 39,90" },
+  { name: "Combinado Nachos", desc: "1 Temaki Salmão Grelhado · 4 Hot Roll Doritos Especial", price: "R$ 42,90" },
+  { name: "Combinado Sushi Uramaki", desc: "08 Uramaki Filadélfia · 08 Uramaki Califórnia · 06 Uramaki Skin", price: "R$ 59,90", img: imgCombinadoSushiUramaki },
+  { name: "Combinado Temaki + Hot", desc: "01 Temaki Salmão · 04 Hot Roll", price: "R$ 39,90", img: imgCombinadoTemakiHot },
   { name: "Combinado Temaki + Joy", desc: "01 Temaki Salmão Completo · 04 Joy Salmão", price: "R$ 41,90", img: imgCombinadoTemakiJoy },
   { name: "Combinado Temaki + Niguiri", desc: "01 Temaki Salmão Completo · 04 Niguiri", price: "R$ 38,90", img: imgCombinadoTemakiNiguiri },
   { name: "Combinado Temaki + Sashimi", desc: "01 Temaki Salmão Completo · 05 Sashimis", price: "R$ 41,90", img: imgCombinadoTemakiSashimi },
@@ -72,7 +77,7 @@ export const COMBINADOS: MenuItem[] = [
 ];
 
 export const TEMAKIS: MenuItem[] = [
-  { name: "Temaki Califórnia", desc: "Arroz, kani, manga e pepino", price: "R$ 26,90" },
+  { name: "Temaki Califórnia", desc: "Arroz, kani, manga e pepino", price: "R$ 26,90", img: imgTemakiCalifornia },
   { name: "Temaki Grill", desc: "Arroz, salmão grelhado, cream cheese e cebolinha", price: "R$ 29,90", img: imgTemakiGrill },
   { name: "Temaki Hot", desc: "Salmão, cream cheese, cebolinha, arroz e panko", price: "R$ 31,90", img: imgTemakiHot },
   { name: "Temaki Salmão Completo", desc: "Arroz, salmão, cream cheese e cebolinha", price: "R$ 28,90" },
@@ -80,23 +85,23 @@ export const TEMAKIS: MenuItem[] = [
 ];
 
 export const HOT_ROLLS: MenuItem[] = [
-  { name: "Hot Roll Doritos Especial", desc: "Arroz, salmão grelhado, cream cheese, cebolinha e doritos · 8 unidades", price: "R$ 35,90" },
-  { name: "Hot Roll Especial", desc: "Arroz, salmão, cream cheese e cebolinha · 8 unidades", price: "R$ 35,90" },
+  { name: "Hot Roll Doritos Especial", desc: "Arroz, salmão grelhado, cream cheese, cebolinha e doritos · 8 unidades", price: "R$ 35,90", img: imgHotRollDoritosEspecial },
+  { name: "Hot Roll Especial", desc: "Arroz, salmão, cream cheese e cebolinha · 8 unidades", price: "R$ 35,90", img: imgHotRollEspecial },
   { name: "Hot Roll Salmão", desc: "Arroz, salmão, cream cheese e cebolinha · 8 unidades", price: "R$ 29,90", img: imgHotRollSalmao },
 ];
 
 export const URAMAKIS: MenuItem[] = [
-  { name: "Sushi Filadélfia", desc: "Arroz, salmão, cream cheese e cebolinha · 8 unidades", price: "R$ 24,90" },
+  { name: "Sushi Filadélfia", desc: "Arroz, salmão, cream cheese e cebolinha · 8 unidades", price: "R$ 24,90", img: imgSushiFiladelfia },
   { name: "Sushi Uramaki Califórnia", desc: "Arroz com gergilim, kani, manga e pepino · 8 unidades", price: "R$ 24,90", img: imgUramakiCalifornia },
   { name: "Sushi Uramaki Filadélfia", desc: "Arroz com gergilim, cream cheese e cebolinha · 8 unidades", price: "R$ 25,90", img: imgUramakiFiladelfia },
   { name: "Sushi Uramaki Skin", desc: "Arroz com gergilim, pele de salmão frita, cream cheese e cebolinha · 8 unidades", price: "R$ 22,90" },
   { name: "Uramaki Salmão", desc: "Arroz com gergelim e salmão · 8 unidades", price: "R$ 17,90", img: imgUramakiSalmao },
   { name: "Uramaki Skin", desc: "Arroz com gergelim, pele de salmão frita, cream cheese e cebolinha · 8 unidades", price: "R$ 22,90" },
+  { name: "Hossomaki de Pepino", desc: "Arroz e pepino · 6 unidades", price: "R$ 12,90", img: imgHossomakiPepino },
+  { name: "Hossomaki de Salmão", desc: "Arroz e salmão · 6 unidades", price: "R$ 16,90", img: imgHossomakiSalmao },
 ];
 
 export const HOSSOMAKIS_OUTROS: MenuItem[] = [
-  { name: "Hossomaki de Pepino", desc: "Arroz e pepino · 6 unidades", price: "R$ 12,90", img: imgHossomakiPepino },
-  { name: "Hossomaki de Salmão", desc: "Arroz e salmão · 6 unidades", price: "R$ 16,90", img: imgHossomakiSalmao },
   { name: "Joy de Salmão", desc: "Arroz, salmão, cream cheese e cebolinha · 6 unidades", price: "R$ 35,90", img: imgJoySalmao },
   { name: "Niguiri Salmão", desc: "Salmão e arroz · 4 unidades", price: "R$ 14,90" },
   { name: "Sashimi", desc: "20 unidades", price: "R$ 69,90", img: imgSashimi },
@@ -131,3 +136,6 @@ export const MENU_CATEGORIES: { title: string; items: MenuItem[] }[] = [
 ];
 
 export const ALL_MENU_ITEMS: MenuItem[] = MENU_CATEGORIES.flatMap((c) => c.items);
+
+// reaproveitada na seção "Sobre" do site (substitui uma foto de banco de imagens antiga)
+export { imgBarcaSalmao };
