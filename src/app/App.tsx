@@ -371,9 +371,9 @@ export default function App() {
           {activeTab === "geral" && (
             <div className="max-w-3xl mx-auto flex flex-col gap-14">
               {[
+                { title: "Promoções", items: PROMOCOES },
                 { title: "Barcas", items: BARCAS },
                 { title: "Combinados", items: COMBINADOS },
-                { title: "Promoções", items: PROMOCOES },
                 { title: "Temakis", items: TEMAKIS },
                 { title: "Hot Rolls", items: HOT_ROLLS },
                 { title: "Sushi", items: SUSHI },
