@@ -99,8 +99,10 @@ export const TEMAKIS: MenuItem[] = [
 ];
 
 export const HOT_ROLLS: MenuItem[] = [
-  { name: "Hot Roll Doritos Especial", desc: "Arroz, salmão grelhado, cream cheese, cebolinha e doritos · 8 unidades", price: "R$ 35,90", img: imgHotRollDoritosEspecial },
-  { name: "Hot Roll Especial", desc: "Arroz, salmão, cream cheese e cebolinha · 8 unidades", price: "R$ 35,90", img: imgHotRollEspecial },
+  // fotos trocadas a pedido do dono (17/08) — o arquivo "doritos-especial" mostrava
+  // o Hot Especial e vice-versa
+  { name: "Hot Roll Doritos Especial", desc: "Arroz, salmão grelhado, cream cheese, cebolinha e doritos · 8 unidades", price: "R$ 35,90", img: imgHotRollEspecial },
+  { name: "Hot Roll Especial", desc: "Arroz, salmão, cream cheese e cebolinha · 8 unidades", price: "R$ 35,90", img: imgHotRollDoritosEspecial },
   { name: "Hot Roll Salmão", desc: "Arroz, salmão, cream cheese e cebolinha · 8 unidades", price: "R$ 29,90", img: imgHotRollSalmao },
 ];
 
@@ -115,13 +117,22 @@ export const SUSHI: MenuItem[] = [
 export const URAMAKIS: MenuItem[] = [
   { name: "Uramaki Salmão", desc: "Arroz com gergelim e salmão · 8 unidades", price: "R$ 17,90", img: imgUramakiSalmao },
   { name: "Uramaki Skin", desc: "Arroz com gergelim, pele de salmão frita, cream cheese e cebolinha · 8 unidades", price: "R$ 22,90", img: imgUramakiSkin },
+];
+
+export const HOSSOMAKIS: MenuItem[] = [
   { name: "Hossomaki de Pepino", desc: "Arroz e pepino · 6 unidades", price: "R$ 12,90", img: imgHossomakiPepino },
   { name: "Hossomaki de Salmão", desc: "Arroz e salmão · 6 unidades", price: "R$ 16,90", img: imgHossomakiSalmao },
 ];
 
-export const HOSSOMAKIS_OUTROS: MenuItem[] = [
+export const JOY: MenuItem[] = [
   { name: "Joy de Salmão", desc: "Arroz, salmão, cream cheese e cebolinha · 6 unidades", price: "R$ 35,90", img: imgJoySalmao },
+];
+
+export const NIGUIRI: MenuItem[] = [
   { name: "Niguiri Salmão", desc: "Salmão e arroz · 4 unidades", price: "R$ 14,90", img: imgNiguiriSalmao },
+];
+
+export const SASHIMI: MenuItem[] = [
   { name: "Sashimi", desc: "20 unidades", price: "R$ 69,90", img: imgSashimi },
 ];
 
@@ -150,8 +161,11 @@ export const MENU_CATEGORIES: { title: string; items: MenuItem[] }[] = [
   { title: "Temakis", items: TEMAKIS },
   { title: "Hot Rolls", items: HOT_ROLLS },
   { title: "Sushi", items: SUSHI },
-  { title: "Uramaki/Hossomaki", items: URAMAKIS },
-  { title: "Outros", items: HOSSOMAKIS_OUTROS },
+  { title: "Uramaki", items: URAMAKIS },
+  { title: "Hossomaki", items: HOSSOMAKIS },
+  { title: "Joy", items: JOY },
+  { title: "Niguiri", items: NIGUIRI },
+  { title: "Sashimi", items: SASHIMI },
 ];
 
 export const ALL_MENU_ITEMS: MenuItem[] = MENU_CATEGORIES.flatMap((c) => c.items);

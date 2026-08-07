@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { motion } from "motion/react";
-import { Menu, X, Phone, Clock, ChevronDown, Bike, ShoppingBag, Star, MapPin, Flame, Tag, Sailboat, UtensilsCrossed, Layers, IceCreamCone, Disc, CircleDot, Sparkles, Images } from "lucide-react";
+import { Menu, X, Phone, Clock, ChevronDown, Bike, ShoppingBag, Star, MapPin, Flame, Tag, Sailboat, UtensilsCrossed, Layers, IceCreamCone, Disc, CircleDot, Circle, Heart, Fish, Soup, Images } from "lucide-react";
 import { ImageWithFallback } from "@/app/components/figma/ImageWithFallback";
 import { OrderModal } from "@/app/components/OrderModal";
 import { AllReviewsModal } from "@/app/components/AllReviewsModal";
@@ -9,7 +9,7 @@ import { CartDrawer } from "@/app/components/CartDrawer";
 import { buildOrderMessage, type CartLine, type DeliveryMode, type PaymentInfo, type DeliveryPaymentMethod } from "@/app/cart-data";
 import logoFull from "@/imports/logo-transparent.png";
 import logoIcon from "@/imports/logo-mark.png";
-import { BARCAS, COMBINADOS, TEMAKIS, HOT_ROLLS, SUSHI, URAMAKIS, HOSSOMAKIS_OUTROS, DEFAULT_PROMO_CONFIG, ALL_MENU_ITEMS, imgBarcaSobre, type MenuItem } from "@/app/menu-data";
+import { BARCAS, COMBINADOS, TEMAKIS, HOT_ROLLS, SUSHI, URAMAKIS, HOSSOMAKIS, JOY, NIGUIRI, SASHIMI, DEFAULT_PROMO_CONFIG, ALL_MENU_ITEMS, imgBarcaSobre, type MenuItem } from "@/app/menu-data";
 
 const WHATSAPP_NUMBER = "5511994597259";
 
@@ -218,8 +218,11 @@ export default function App() {
     { id: "temakis", label: "Temakis", icon: <IceCreamCone size={12} /> },
     { id: "hotrolls", label: "Hot Rolls", icon: <Flame size={12} /> },
     { id: "sushi", label: "Sushi", icon: <Disc size={12} /> },
-    { id: "uramakis", label: "Uramaki/Hossomaki", icon: <CircleDot size={12} /> },
-    { id: "outros", label: "Joy, Niguiri e Sashimi", icon: <Sparkles size={12} /> },
+    { id: "uramakis", label: "Uramaki", icon: <CircleDot size={12} /> },
+    { id: "hossomakis", label: "Hossomaki", icon: <Circle size={12} /> },
+    { id: "joy", label: "Joy", icon: <Heart size={12} /> },
+    { id: "niguiri", label: "Niguiri", icon: <Fish size={12} /> },
+    { id: "sashimi", label: "Sashimi", icon: <Soup size={12} /> },
   ];
 
   // depoimentos aprovados são os mais recentes (o Worker já devolve os mais novos
@@ -374,8 +377,11 @@ export default function App() {
                 { title: "Temakis", items: TEMAKIS },
                 { title: "Hot Rolls", items: HOT_ROLLS },
                 { title: "Sushi", items: SUSHI },
-                { title: "Uramaki/Hossomaki", items: URAMAKIS },
-                { title: "Joy, Niguiri e Sashimi", items: HOSSOMAKIS_OUTROS },
+                { title: "Uramaki", items: URAMAKIS },
+                { title: "Hossomaki", items: HOSSOMAKIS },
+                { title: "Joy", items: JOY },
+                { title: "Niguiri", items: NIGUIRI },
+                { title: "Sashimi", items: SASHIMI },
               ].filter((section) => section.items.length > 0).map((section) => (
                 <div key={section.title}>
                   <h3 className="text-gradient text-2xl md:text-3xl font-black mb-4" style={{ fontFamily: "'Orbitron', sans-serif" }}>
@@ -467,19 +473,49 @@ export default function App() {
           {/* URAMAKIS */}
           {activeTab === "uramakis" && (
             <div className="max-w-3xl mx-auto">
-              <SectionHeader label="Sabor e sofisticação em cada detalhe!" title="URAMAKI & HOSSOMAKI" />
+              <SectionHeader label="Sabor e sofisticação em cada detalhe!" title="URAMAKI" />
               <div className="divide-y divide-border">
                 {URAMAKIS.map((item) => <ListItem key={item.name} {...item} onSelect={() => setActiveMenuItem(item)} />)}
               </div>
             </div>
           )}
 
-          {/* OUTROS */}
-          {activeTab === "outros" && (
+          {/* HOSSOMAKIS */}
+          {activeTab === "hossomakis" && (
             <div className="max-w-3xl mx-auto">
-              <SectionHeader label="Joy, Niguiri e Sashimi" title="OUTROS" />
+              <SectionHeader label="Simples e deliciosos!" title="HOSSOMAKI" />
               <div className="divide-y divide-border">
-                {HOSSOMAKIS_OUTROS.map((item) => <ListItem key={item.name} {...item} onSelect={() => setActiveMenuItem(item)} />)}
+                {HOSSOMAKIS.map((item) => <ListItem key={item.name} {...item} onSelect={() => setActiveMenuItem(item)} />)}
+              </div>
+            </div>
+          )}
+
+          {/* JOY */}
+          {activeTab === "joy" && (
+            <div className="max-w-3xl mx-auto">
+              <SectionHeader label="Uma explosão de sabor!" title="JOY" />
+              <div className="divide-y divide-border">
+                {JOY.map((item) => <ListItem key={item.name} {...item} onSelect={() => setActiveMenuItem(item)} />)}
+              </div>
+            </div>
+          )}
+
+          {/* NIGUIRI */}
+          {activeTab === "niguiri" && (
+            <div className="max-w-3xl mx-auto">
+              <SectionHeader label="Tradição em cada peça!" title="NIGUIRI" />
+              <div className="divide-y divide-border">
+                {NIGUIRI.map((item) => <ListItem key={item.name} {...item} onSelect={() => setActiveMenuItem(item)} />)}
+              </div>
+            </div>
+          )}
+
+          {/* SASHIMI */}
+          {activeTab === "sashimi" && (
+            <div className="max-w-3xl mx-auto">
+              <SectionHeader label="Puro sabor do salmão fresco!" title="SASHIMI" />
+              <div className="divide-y divide-border">
+                {SASHIMI.map((item) => <ListItem key={item.name} {...item} onSelect={() => setActiveMenuItem(item)} />)}
               </div>
             </div>
           )}
