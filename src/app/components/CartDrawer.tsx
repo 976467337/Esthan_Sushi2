@@ -442,6 +442,7 @@ export function CartDrawer({
                       <div>
                         <p className="text-foreground text-sm font-semibold">Entrega</p>
                         <p className="text-muted-foreground text-xs mt-1">Receba no seu endereço</p>
+                        <p className="text-muted-foreground text-xs mt-1">Até {FAR_DELIVERY_KM_THRESHOLD} km do restaurante — acima disso, o frete é combinado</p>
                       </div>
                       <span className="text-primary font-bold text-sm whitespace-nowrap">+ {formatPrice(DELIVERY_FEE)}</span>
                     </button>
