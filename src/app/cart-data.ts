@@ -14,6 +14,8 @@ import imgAguaMineral from "@/imports/bebidas/agua-mineral.jpg";
 import imgSucoUva from "@/imports/bebidas/suco-uva.jpg";
 import imgDelValleUva from "@/imports/bebidas/del-valle-uva.jpg";
 import imgDelValleManga from "@/imports/bebidas/del-valle-manga.jpg";
+import imgDelVallePessego from "@/imports/bebidas/del-valle-pessego.jpg";
+import imgDelValleGoiaba from "@/imports/bebidas/del-valle-goiaba.jpg";
 import { FAR_DELIVERY_KM_THRESHOLD } from "@/app/delivery";
 
 export type CartLine = {
@@ -56,12 +58,11 @@ export const DRINKS: Drink[] = [
   { name: "Água Mineral 500ml", price: 4, img: imgAguaMineral },
   { name: "Suco de Uva 300ml", price: 7, img: imgSucoUva },
   { name: "Del Valle Uva Lata 290ml", price: 6, img: imgDelValleUva },
-  // Maçã e Frutas Vermelhas não parecem existir como lata 290ml de verdade no catálogo
-  // da Del Valle (Maçã só achei em caixinha 200ml/1L, Frutas Vermelhas não encontrei em
-  // lugar nenhum) — fiquei sem achar foto real pra essas duas, ver aviso separado.
-  { name: "Del Valle Maçã Lata 290ml", price: 6 },
+  // "Maçã" e "Frutas Vermelhas" (lata 290ml) não existem no catálogo real da Del Valle —
+  // trocados por Pêssego e Goiaba, que são sabores reais nesse mesmo formato de lata.
+  { name: "Del Valle Pêssego Lata 290ml", price: 6, img: imgDelVallePessego },
   { name: "Del Valle Néctar de Manga Lata 290ml", price: 6, img: imgDelValleManga },
-  { name: "Del Valle Frutas Vermelhas Lata 290ml", price: 6 },
+  { name: "Del Valle Goiaba Lata 290ml", price: 6, img: imgDelValleGoiaba },
   { name: "Red Bull Energético 250ml", price: 12, img: imgRedBull },
 ];
 
