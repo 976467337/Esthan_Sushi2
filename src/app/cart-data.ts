@@ -11,7 +11,6 @@ import imgFantaUva from "@/imports/bebidas/fanta-uva.jpg";
 import imgGuaranaAntarcticaZero from "@/imports/bebidas/guarana-antarctica-zero.jpg";
 import imgSkol from "@/imports/bebidas/skol.jpg";
 import imgAguaMineral from "@/imports/bebidas/agua-mineral.jpg";
-import imgSucoUva from "@/imports/bebidas/suco-uva.jpg";
 import imgDelValleUva from "@/imports/bebidas/del-valle-uva.jpg";
 import imgDelValleManga from "@/imports/bebidas/del-valle-manga.jpg";
 import imgDelVallePessego from "@/imports/bebidas/del-valle-pessego.jpg";
@@ -56,7 +55,6 @@ export const DRINKS: Drink[] = [
   { name: "Skol Lata 350ml", price: 9, img: imgSkol },
   { name: "Heineken Lata 350ml", price: 9, img: imgHeineken },
   { name: "Água Mineral 500ml", price: 4, img: imgAguaMineral },
-  { name: "Suco de Uva 300ml", price: 7, img: imgSucoUva },
   { name: "Del Valle Uva Lata 290ml", price: 6, img: imgDelValleUva },
   // "Maçã" e "Frutas Vermelhas" (lata 290ml) não existem no catálogo real da Del Valle —
   // trocados por Pêssego e Goiaba, que são sabores reais nesse mesmo formato de lata.
