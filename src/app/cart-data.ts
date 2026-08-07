@@ -25,11 +25,34 @@ export type CartLine = {
   extras?: string[];
 };
 
-// Todos os molhos são tratados igual: o 1º tipo que o cliente marca sai grátis (1 potinho
-// por unidade do prato), sem distinção entre eles. A partir do 2º tipo marcado no mesmo
-// prato, cada potinho extra sai a EXTRA_SAUCE_FEE, multiplicado pela quantidade.
+// Todos os molhos são tratados igual, sem distinção entre eles. O total de potinhos
+// grátis numa linha é igual à quantidade de pratos (1 por unidade) — e esse "crédito"
+// é espalhado entre os tipos marcados (um de cada vez, na ordem em que o cliente marcou),
+// em vez de ir tudo pro primeiro tipo. Ex: 2 pratos + Shoyu e Gengibre marcados = 1 Shoyu
+// grátis + 1 Gengibre grátis (os outros 2 potinhos saem a EXTRA_SAUCE_FEE cada).
 export const EXTRAS = ["Shoyu", "Gengibre", "Wasabi", "Molho tarê"];
 export const EXTRA_SAUCE_FEE = 2;
+
+export type SauceBreakdown = { name: string; free: number; paid: number };
+
+export function sauceBreakdown(extras: string[], qty: number): SauceBreakdown[] {
+  const items = extras.map((name) => ({ name, remaining: qty, free: 0 }));
+  let pool = qty; // total de potinhos grátis disponíveis nessa linha (1 por unidade)
+  let progressed = true;
+  while (pool > 0 && progressed) {
+    progressed = false;
+    for (const item of items) {
+      if (pool <= 0) break;
+      if (item.remaining > 0) {
+        item.free += 1;
+        item.remaining -= 1;
+        pool -= 1;
+        progressed = true;
+      }
+    }
+  }
+  return items.map((item) => ({ name: item.name, free: item.free, paid: qty - item.free }));
+}
 
 // preços placeholder (cerveja e Red Bull) — ajuste os valores reais antes de publicar.
 // Refrigerantes em lata já confirmados em R$ 7 pelo dono.
@@ -69,11 +92,9 @@ export function formatPrice(value: number): string {
   return `R$ ${value.toFixed(2).replace(".", ",")}`;
 }
 
-// O 1º tipo de molho marcado (na ordem em que o cliente marcou) sai grátis em todas as
-// unidades do prato. Cada tipo extra marcado (2º, 3º...) sai a EXTRA_SAUCE_FEE por unidade.
 function extrasChargeForLine(extras: string[], qty: number): number {
-  const extraTypesBeyondFirst = Math.max(0, extras.length - 1);
-  return extraTypesBeyondFirst * qty * EXTRA_SAUCE_FEE;
+  const totalPaidPackets = sauceBreakdown(extras, qty).reduce((sum, b) => sum + b.paid, 0);
+  return totalPaidPackets * EXTRA_SAUCE_FEE;
 }
 
 export function lineTotal(line: CartLine): number {

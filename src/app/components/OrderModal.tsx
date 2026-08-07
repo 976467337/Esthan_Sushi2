@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { X, Minus, Plus, ShoppingBag, CheckCircle2, CupSoda, Expand } from "lucide-react";
-import { EXTRAS, DRINKS, EXTRA_SAUCE_FEE, parsePrice, formatPrice, type CartLine, type Drink } from "@/app/cart-data";
+import { EXTRAS, DRINKS, EXTRA_SAUCE_FEE, sauceBreakdown, parsePrice, formatPrice, type CartLine, type Drink } from "@/app/cart-data";
 import { ImageLightbox } from "@/app/components/ImageLightbox";
 
 type MenuItem = { name: string; price: string; img?: string };
@@ -104,20 +104,22 @@ export function OrderModal({
 
               <p className="text-muted-foreground text-xs tracking-widest uppercase mb-1">Personalizar (molhos e adicionais)</p>
               <p className="text-muted-foreground text-xs mb-3">
-                O 1º molho marcado sai grátis (1 potinho por unidade). A partir do 2º tipo marcado, cada potinho extra sai + {formatPrice(EXTRA_SAUCE_FEE)} por unidade.
+                Cada prato leva 1 potinho grátis, espalhado entre os molhos marcados. Os potinhos extras saem + {formatPrice(EXTRA_SAUCE_FEE)} cada.
               </p>
               <div className="flex flex-col gap-2 mb-8">
                 {EXTRAS.map((extra) => {
                   const checked = extras.includes(extra);
-                  // ordem de seleção (não a ordem da lista) decide qual é o "1º" grátis
-                  const position = checked ? extras.indexOf(extra) : extras.length;
+                  // simula como ficaria se esse molho estivesse marcado, pra mostrar o preço
+                  // real mesmo antes de clicar (o crédito grátis é dividido entre os marcados)
+                  const previewExtras = checked ? extras : [...extras, extra];
+                  const entry = sauceBreakdown(previewExtras, qty).find((b) => b.name === extra)!;
                   let priceLabel: string;
-                  if (position === 0) {
+                  if (entry.paid === 0) {
                     priceLabel = "Grátis";
-                  } else if (qty === 1) {
-                    priceLabel = `+ ${formatPrice(EXTRA_SAUCE_FEE)}`;
+                  } else if (entry.free === 0) {
+                    priceLabel = qty === 1 ? `+ ${formatPrice(EXTRA_SAUCE_FEE)}` : `${qty} x ${formatPrice(EXTRA_SAUCE_FEE)}`;
                   } else {
-                    priceLabel = `${qty} x ${formatPrice(EXTRA_SAUCE_FEE)}`;
+                    priceLabel = `${entry.free} grátis + ${entry.paid} x ${formatPrice(EXTRA_SAUCE_FEE)}`;
                   }
                   return (
                     <label key={extra}
