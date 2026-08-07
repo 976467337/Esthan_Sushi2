@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { motion } from "motion/react";
-import { Menu, X, Phone, Clock, ChevronDown, Bike, ShoppingBag, Star, MapPin, Flame, Tag, Sailboat, UtensilsCrossed, Layers, IceCreamCone, Disc, Sparkles, Images } from "lucide-react";
+import { Menu, X, Phone, Clock, ChevronDown, Bike, ShoppingBag, Star, MapPin, Flame, Tag, Sailboat, UtensilsCrossed, Layers, IceCreamCone, Disc, CircleDot, Sparkles, Images } from "lucide-react";
 import { ImageWithFallback } from "@/app/components/figma/ImageWithFallback";
 import { OrderModal } from "@/app/components/OrderModal";
 import { AllReviewsModal } from "@/app/components/AllReviewsModal";
@@ -9,7 +9,7 @@ import { CartDrawer } from "@/app/components/CartDrawer";
 import { buildOrderMessage, type CartLine, type DeliveryMode, type PaymentInfo, type DeliveryPaymentMethod } from "@/app/cart-data";
 import logoFull from "@/imports/logo-transparent.png";
 import logoIcon from "@/imports/logo-mark.png";
-import { BARCAS, COMBINADOS, TEMAKIS, HOT_ROLLS, URAMAKIS, HOSSOMAKIS_OUTROS, DEFAULT_PROMO_CONFIG, ALL_MENU_ITEMS, imgBarcaSobre, type MenuItem } from "@/app/menu-data";
+import { BARCAS, COMBINADOS, TEMAKIS, HOT_ROLLS, SUSHI, URAMAKIS, HOSSOMAKIS_OUTROS, DEFAULT_PROMO_CONFIG, ALL_MENU_ITEMS, imgBarcaSobre, type MenuItem } from "@/app/menu-data";
 
 const WHATSAPP_NUMBER = "5511994597259";
 
@@ -217,7 +217,8 @@ export default function App() {
     { id: "promocoes", label: "Promoções", icon: <Tag size={12} /> },
     { id: "temakis", label: "Temakis", icon: <IceCreamCone size={12} /> },
     { id: "hotrolls", label: "Hot Rolls", icon: <Flame size={12} /> },
-    { id: "uramakis", label: "Sushi/Uramaki/Hossomaki", icon: <Disc size={12} /> },
+    { id: "sushi", label: "Sushi", icon: <Disc size={12} /> },
+    { id: "uramakis", label: "Uramaki/Hossomaki", icon: <CircleDot size={12} /> },
     { id: "outros", label: "Joy, Niguiri e Sashimi", icon: <Sparkles size={12} /> },
   ];
 
@@ -372,7 +373,8 @@ export default function App() {
                 { title: "Promoções", items: PROMOCOES },
                 { title: "Temakis", items: TEMAKIS },
                 { title: "Hot Rolls", items: HOT_ROLLS },
-                { title: "Sushi/Uramaki/Hossomaki", items: URAMAKIS },
+                { title: "Sushi", items: SUSHI },
+                { title: "Uramaki/Hossomaki", items: URAMAKIS },
                 { title: "Joy, Niguiri e Sashimi", items: HOSSOMAKIS_OUTROS },
               ].filter((section) => section.items.length > 0).map((section) => (
                 <div key={section.title}>
@@ -452,10 +454,20 @@ export default function App() {
             </div>
           )}
 
+          {/* SUSHI */}
+          {activeTab === "sushi" && (
+            <div className="max-w-3xl mx-auto">
+              <SectionHeader label="Clássicos que não podem faltar!" title="SUSHI" />
+              <div className="divide-y divide-border">
+                {SUSHI.map((item) => <ListItem key={item.name} {...item} onSelect={() => setActiveMenuItem(item)} />)}
+              </div>
+            </div>
+          )}
+
           {/* URAMAKIS */}
           {activeTab === "uramakis" && (
             <div className="max-w-3xl mx-auto">
-              <SectionHeader label="Sabor e sofisticação em cada detalhe!" title="URAMAKIS & HOSSOMAKI" />
+              <SectionHeader label="Sabor e sofisticação em cada detalhe!" title="URAMAKI & HOSSOMAKI" />
               <div className="divide-y divide-border">
                 {URAMAKIS.map((item) => <ListItem key={item.name} {...item} onSelect={() => setActiveMenuItem(item)} />)}
               </div>

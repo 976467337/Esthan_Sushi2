@@ -104,11 +104,15 @@ export const HOT_ROLLS: MenuItem[] = [
   { name: "Hot Roll Salmão", desc: "Arroz, salmão, cream cheese e cebolinha · 8 unidades", price: "R$ 29,90", img: imgHotRollSalmao },
 ];
 
-export const URAMAKIS: MenuItem[] = [
+// Pratos cujo nome começa com "Sushi" — separados do Uramaki/Hossomaki a pedido do dono.
+export const SUSHI: MenuItem[] = [
   { name: "Sushi Filadélfia", desc: "Arroz, salmão, cream cheese e cebolinha · 8 unidades", price: "R$ 24,90", img: imgSushiFiladelfia },
   { name: "Sushi Uramaki Califórnia", desc: "Arroz com gergilim, kani, manga e pepino · 8 unidades", price: "R$ 24,90", img: imgUramakiCalifornia },
   { name: "Sushi Uramaki Filadélfia", desc: "Arroz com gergilim, cream cheese e cebolinha · 8 unidades", price: "R$ 25,90", img: imgUramakiFiladelfia },
   { name: "Sushi Uramaki Skin", desc: "Arroz com gergilim, pele de salmão frita, cream cheese e cebolinha · 8 unidades", price: "R$ 22,90", img: imgUramakiSkin },
+];
+
+export const URAMAKIS: MenuItem[] = [
   { name: "Uramaki Salmão", desc: "Arroz com gergelim e salmão · 8 unidades", price: "R$ 17,90", img: imgUramakiSalmao },
   { name: "Uramaki Skin", desc: "Arroz com gergelim, pele de salmão frita, cream cheese e cebolinha · 8 unidades", price: "R$ 22,90", img: imgUramakiSkin },
   { name: "Hossomaki de Pepino", desc: "Arroz e pepino · 6 unidades", price: "R$ 12,90", img: imgHossomakiPepino },
@@ -145,7 +149,8 @@ export const MENU_CATEGORIES: { title: string; items: MenuItem[] }[] = [
   { title: "Combinados", items: COMBINADOS },
   { title: "Temakis", items: TEMAKIS },
   { title: "Hot Rolls", items: HOT_ROLLS },
-  { title: "Uramakis", items: URAMAKIS },
+  { title: "Sushi", items: SUSHI },
+  { title: "Uramaki/Hossomaki", items: URAMAKIS },
   { title: "Outros", items: HOSSOMAKIS_OUTROS },
 ];
 
