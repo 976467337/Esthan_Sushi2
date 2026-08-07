@@ -13,6 +13,11 @@ import { BARCAS, COMBINADOS, TEMAKIS, HOT_ROLLS, URAMAKIS, HOSSOMAKIS_OUTROS, DE
 
 const WHATSAPP_NUMBER = "5511994597259";
 
+// mesmas coordenadas usadas no Worker pro cálculo de rota (RESTAURANT_ORIGIN) — usar lat/lon
+// direto em vez do endereço em texto porque o número exato dessa rua não está bem indexado
+// no Google/Waze, então buscar pelo texto às vezes cai num ponto errado da rua.
+const RESTAURANT_COORDS = "-23.4737,-46.6695";
+
 // depoimento: visitante envia -> Cloudflare Worker guarda como pendente, dispara
 // (server-side, via CallMeBot) um aviso automático no WhatsApp do dono com um link
 // de aprovação de 1 toque -> nada é publicado até ele tocar no link e aprovar.
@@ -646,14 +651,32 @@ export default function App() {
               {[
                 { icon: <Phone size={18} className="text-primary" />, label: "WhatsApp", val: "(11) 99459-7259" },
                 { icon: <Clock size={18} className="text-primary" />, label: "Horário de delivery", val: "Segunda a Sábado · 19h30 às 23h" },
-                { icon: <MapPin size={18} className="text-primary" />, label: "Localização", val: "Rua Marina Lemos de Abreu, 68 B · Jardim Centenário" },
+                {
+                  icon: <MapPin size={18} className="text-primary" />, label: "Localização",
+                  val: "Rua Marina Lemos de Abreu, 68 B · Jardim Centenário",
+                  href: `https://www.google.com/maps/dir/?api=1&destination=${RESTAURANT_COORDS}`,
+                  wazeHref: `https://waze.com/ul?ll=${RESTAURANT_COORDS}&navigate=yes`,
+                },
                 { icon: <Bike size={18} className="text-primary" />, label: "Taxa de entrega", val: "Até 20 km: R$ 7,00 · Acima disso, valor combinado" },
               ].map((c) => (
                 <div key={c.label} className="flex items-start gap-4 border-b border-border pb-5">
                   <div className="w-10 h-10 border border-primary/30 flex items-center justify-center flex-shrink-0">{c.icon}</div>
-                  <div>
+                  <div className="min-w-0">
                     <p className="text-muted-foreground text-xs tracking-widest uppercase mb-1">{c.label}</p>
-                    <p className="text-foreground text-sm">{c.val}</p>
+                    {c.href ? (
+                      <>
+                        <a href={c.href} target="_blank" rel="noopener noreferrer"
+                          className="text-foreground text-sm hover:text-primary transition-colors underline decoration-dotted underline-offset-4">
+                          {c.val}
+                        </a>
+                        <a href={c.wazeHref} target="_blank" rel="noopener noreferrer"
+                          className="block text-primary text-xs mt-1 hover:brightness-110 transition-all">
+                          Abrir no Waze
+                        </a>
+                      </>
+                    ) : (
+                      <p className="text-foreground text-sm">{c.val}</p>
+                    )}
                   </div>
                 </div>
               ))}
