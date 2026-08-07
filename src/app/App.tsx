@@ -658,7 +658,7 @@ export default function App() {
                   href: `https://www.google.com/maps/dir/?api=1&destination=${RESTAURANT_COORDS}`,
                   wazeHref: `https://waze.com/ul?ll=${RESTAURANT_COORDS}&navigate=yes`,
                 },
-                { icon: <Bike size={18} className="text-primary" />, label: "Taxa de entrega", val: "Até 20 km: R$ 7,00 · Acima disso, valor combinado" },
+                { icon: <Bike size={18} className="text-primary" />, label: "Taxa de entrega", val: "Para endereços em até 20 km, cobramos R$ 7,00. Fora desse raio, combinamos o valor certinho com você antes de confirmar o pedido." },
               ].map((c) => (
                 <div key={c.label} className="flex items-start gap-4 border-b border-border pb-5">
                   <div className="w-10 h-10 border border-primary/30 flex items-center justify-center flex-shrink-0">{c.icon}</div>
