@@ -281,13 +281,13 @@ export function CartDrawer({
     setStep("payment");
   };
 
-  // Fora do raio padrão de entrega — a taxa fixa de R$7 não vale mais, o frete
-  // precisa ser combinado com os parceiros de entrega antes de confirmar.
+  // Fora do raio padrão de entrega (endereço encontrado no mapa, mas longe demais) — a
+  // taxa fixa de R$7 não vale mais, o frete precisa ser combinado antes de confirmar.
   const isFarDelivery = deliveryMode === "delivery" && !!distanceKm && distanceKm > FAR_DELIVERY_KM_THRESHOLD;
-  // Não deu pra confirmar a distância automaticamente (endereço não geocodificou) — trata
-  // com a mesma cautela de um endereço longe, em vez de assumir que está tudo normal.
-  const isDistanceUnknown = deliveryMode === "delivery" && distanceUnknown;
-  const needsManualFreight = isFarDelivery || isDistanceUnknown;
+  // Quando o endereço não geocodifica (comum em bairro periférico, fora da base do
+  // OpenStreetMap), trata como entrega normal — cobra a taxa fixa e segue o pedido,
+  // só sem o tempo estimado calculado de verdade (cai na média do site).
+  const needsManualFreight = isFarDelivery;
 
   const orderGrandTotal = cartTotal(cart) + (deliveryMode === "delivery" && !needsManualFreight ? DELIVERY_FEE : 0);
 
@@ -638,13 +638,9 @@ export function CartDrawer({
                       <div className="flex items-start gap-3 border border-amber-500/40 bg-amber-500/10 px-4 py-4">
                         <AlertCircle size={20} className="text-amber-500 flex-shrink-0 mt-0.5" />
                         <div>
-                          <p className="text-foreground text-sm font-semibold">
-                            {isFarDelivery ? "Endereço fora do raio de 20 km" : "Não conseguimos confirmar a distância"}
-                          </p>
+                          <p className="text-foreground text-sm font-semibold">Endereço fora do raio de 20 km</p>
                           <p className="text-muted-foreground text-xs mt-1 leading-relaxed">
-                            {isFarDelivery
-                              ? `A taxa fixa de R$7 vale até 20 km. Pra esse endereço (~${String(distanceKm).replace(".", ",")}km), o frete precisa ser combinado com nossos parceiros de entrega antes de confirmar — a gente retorna com o valor certinho.`
-                              : "Não conseguimos localizar esse endereço automaticamente no mapa pra calcular a distância. Seu pedido será enviado normalmente e a gente confirma o valor do frete com você."}
+                            A taxa fixa de R$7 vale até 20 km. Pra esse endereço (~{String(distanceKm).replace(".", ",")}km), o frete precisa ser combinado com nossos parceiros de entrega antes de confirmar — a gente retorna com o valor certinho.
                           </p>
                         </div>
                       </div>
@@ -784,13 +780,9 @@ export function CartDrawer({
                   <div className="flex flex-col gap-4 items-center text-center py-4">
                     <CheckCircle2 size={36} className="text-primary" />
                     <p className="text-foreground text-base leading-relaxed">
-                      {isFarDelivery
-                        ? <>Seu pedido foi emitido normalmente. Como seu endereço fica a mais de {FAR_DELIVERY_KM_THRESHOLD} km do
-                          restaurante, precisamos alinhar o valor do frete com nossos parceiros de entrega antes de confirmar —
-                          assim que possível, retornamos por aqui (WhatsApp) com o valor certinho.</>
-                        : <>Seu pedido foi emitido normalmente. Não conseguimos localizar seu endereço automaticamente no mapa
-                          pra calcular a distância, então vamos confirmar o valor do frete com você — assim que possível,
-                          retornamos por aqui (WhatsApp) com o valor certinho.</>}
+                      Seu pedido foi emitido normalmente. Como seu endereço fica a mais de {FAR_DELIVERY_KM_THRESHOLD} km do
+                      restaurante, precisamos alinhar o valor do frete com nossos parceiros de entrega antes de confirmar —
+                      assim que possível, retornamos por aqui (WhatsApp) com o valor certinho.
                     </p>
                     <p className="text-muted-foreground text-sm">Agradecemos desde já pela compreensão! 🙏</p>
 
