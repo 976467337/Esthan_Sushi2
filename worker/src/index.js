@@ -336,6 +336,37 @@ export default {
         });
       }
 
+      // OpenStreetMap (gratuito) não tem essa rua/bairro mapeado — muito comum em bairro
+      // periférico de SP. Se a chave do Google Maps estiver configurada, tenta lá (base de
+      // endereços bem mais completa) antes de desistir de vez.
+      if (env.GOOGLE_MAPS_API_KEY) {
+        const fullQuery = [street, number, neighborhood, city, state, 'Brasil'].filter(Boolean).join(', ');
+        const gUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(fullQuery)}&region=br&components=country:BR&key=${env.GOOGLE_MAPS_API_KEY}`;
+        const gResp = await fetch(gUrl);
+        const gData = await gResp.json().catch(() => null);
+
+        if (gData?.status === 'OK' && gData.results?.length) {
+          const r = gData.results[0];
+          const comp = r.address_components || [];
+          const findComp = (type) => comp.find((c) => c.types.includes(type))?.long_name || '';
+          const resultCity = (findComp('administrative_area_level_2') || findComp('locality')).toLowerCase();
+          const resultState = findComp('administrative_area_level_1').toLowerCase();
+          const cityMatches = !resultCity || resultCity.includes(city.toLowerCase()) || city.toLowerCase().includes(resultCity);
+          const stateMatches = !resultState || resultState.includes('são paulo') || resultState.includes('sao paulo') || resultState.includes(state.toLowerCase());
+
+          if (cityMatches && stateMatches) {
+            return json(cors, {
+              found: true,
+              lat: r.geometry.location.lat,
+              lon: r.geometry.location.lng,
+              displayName: r.formatted_address,
+              precision: r.geometry.location_type === 'ROOFTOP' ? 'exact' : 'approximate',
+              source: 'google',
+            });
+          }
+        }
+      }
+
       return json(cors, { found: false });
     }
 
@@ -349,10 +380,28 @@ export default {
       const resp = await fetch(routeUrl);
       const data = await resp.json();
 
-      if (data.code !== 'Ok' || !data.routes?.length) return json(cors, { error: 'no_route' }, 502);
-      const travelMinutes = Math.max(1, Math.ceil(data.routes[0].duration / 60));
-      const distanceKm = Math.round((data.routes[0].distance / 1000) * 10) / 10;
-      return json(cors, { travelMinutes, prepMinutes: PREP_MINUTES, totalMinutes: travelMinutes + PREP_MINUTES, distanceKm });
+      if (data.code === 'Ok' && data.routes?.length) {
+        const travelMinutes = Math.max(1, Math.ceil(data.routes[0].duration / 60));
+        const distanceKm = Math.round((data.routes[0].distance / 1000) * 10) / 10;
+        return json(cors, { travelMinutes, prepMinutes: PREP_MINUTES, totalMinutes: travelMinutes + PREP_MINUTES, distanceKm });
+      }
+
+      // OSRM (gratuito) não conseguiu traçar rota — tenta pelo Google Distance Matrix
+      // se a chave estiver configurada, antes de desistir.
+      if (env.GOOGLE_MAPS_API_KEY) {
+        const gUrl = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${RESTAURANT_ORIGIN.lat},${RESTAURANT_ORIGIN.lon}&destinations=${lat},${lon}&mode=driving&key=${env.GOOGLE_MAPS_API_KEY}`;
+        const gResp = await fetch(gUrl);
+        const gData = await gResp.json().catch(() => null);
+        const el = gData?.rows?.[0]?.elements?.[0];
+
+        if (gData?.status === 'OK' && el?.status === 'OK') {
+          const travelMinutes = Math.max(1, Math.ceil(el.duration.value / 60));
+          const distanceKm = Math.round((el.distance.value / 1000) * 10) / 10;
+          return json(cors, { travelMinutes, prepMinutes: PREP_MINUTES, totalMinutes: travelMinutes + PREP_MINUTES, distanceKm, source: 'google' });
+        }
+      }
+
+      return json(cors, { error: 'no_route' }, 502);
     }
 
     return new Response('Not found', { status: 404 });
