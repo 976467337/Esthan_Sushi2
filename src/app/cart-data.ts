@@ -3,6 +3,17 @@
 import imgGuaranaAntarctica from "@/imports/bebidas/guarana-antarctica.jpg";
 import imgRedBull from "@/imports/bebidas/red-bull.jpg";
 import imgHeineken from "@/imports/bebidas/heineken.jpg";
+import imgItubaina from "@/imports/bebidas/itubaina.jpg";
+import imgCocaCola from "@/imports/bebidas/coca-cola.jpg";
+import imgCocaColaZero from "@/imports/bebidas/coca-cola-zero.jpg";
+import imgFantaLaranja from "@/imports/bebidas/fanta-laranja.jpg";
+import imgFantaUva from "@/imports/bebidas/fanta-uva.jpg";
+import imgGuaranaAntarcticaZero from "@/imports/bebidas/guarana-antarctica-zero.jpg";
+import imgSkol from "@/imports/bebidas/skol.jpg";
+import imgAguaMineral from "@/imports/bebidas/agua-mineral.jpg";
+import imgSucoUva from "@/imports/bebidas/suco-uva.jpg";
+import imgDelValleUva from "@/imports/bebidas/del-valle-uva.jpg";
+import imgDelValleManga from "@/imports/bebidas/del-valle-manga.jpg";
 import { FAR_DELIVERY_KM_THRESHOLD } from "@/app/delivery";
 
 export type CartLine = {
@@ -33,20 +44,23 @@ export const EXTRA_SAUCE_FEE = 2;
 export type Drink = { name: string; price: number; img?: string };
 
 export const DRINKS: Drink[] = [
-  { name: "Itubaina Lata 350ml", price: 7 },
-  { name: "Coca-Cola Lata 350ml", price: 7 },
-  { name: "Coca-Cola Zero Lata 350ml", price: 7 },
-  { name: "Fanta Laranja Lata 350ml", price: 7 },
-  { name: "Fanta Uva Lata 350ml", price: 7 },
+  { name: "Itubaina Lata 350ml", price: 7, img: imgItubaina },
+  { name: "Coca-Cola Lata 350ml", price: 7, img: imgCocaCola },
+  { name: "Coca-Cola Zero Lata 350ml", price: 7, img: imgCocaColaZero },
+  { name: "Fanta Laranja Lata 350ml", price: 7, img: imgFantaLaranja },
+  { name: "Fanta Uva Lata 350ml", price: 7, img: imgFantaUva },
   { name: "Guaraná Antarctica Lata 350ml", price: 7, img: imgGuaranaAntarctica },
-  { name: "Guaraná Antarctica Zero Lata 350ml", price: 7 },
-  { name: "Skol Lata 350ml", price: 9 },
+  { name: "Guaraná Antarctica Zero Lata 350ml", price: 7, img: imgGuaranaAntarcticaZero },
+  { name: "Skol Lata 350ml", price: 9, img: imgSkol },
   { name: "Heineken Lata 350ml", price: 9, img: imgHeineken },
-  { name: "Água Mineral 500ml", price: 4 },
-  { name: "Suco de Uva 300ml", price: 7 },
-  { name: "Del Valle Uva Lata 290ml", price: 6 },
+  { name: "Água Mineral 500ml", price: 4, img: imgAguaMineral },
+  { name: "Suco de Uva 300ml", price: 7, img: imgSucoUva },
+  { name: "Del Valle Uva Lata 290ml", price: 6, img: imgDelValleUva },
+  // Maçã e Frutas Vermelhas não parecem existir como lata 290ml de verdade no catálogo
+  // da Del Valle (Maçã só achei em caixinha 200ml/1L, Frutas Vermelhas não encontrei em
+  // lugar nenhum) — fiquei sem achar foto real pra essas duas, ver aviso separado.
   { name: "Del Valle Maçã Lata 290ml", price: 6 },
-  { name: "Del Valle Néctar de Manga Lata 290ml", price: 6 },
+  { name: "Del Valle Néctar de Manga Lata 290ml", price: 6, img: imgDelValleManga },
   { name: "Del Valle Frutas Vermelhas Lata 290ml", price: 6 },
   { name: "Red Bull Energético 250ml", price: 12, img: imgRedBull },
 ];
