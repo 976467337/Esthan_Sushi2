@@ -296,18 +296,47 @@ export default {
       return new Response('ok', { status: 200 });
     }
 
-    // Valida o endereço digitado pelo cliente (proxy pro Nominatim/OSM — sem CORS liberado pra chamar direto do navegador)
+    // Valida o endereço digitado pelo cliente (proxy pro Nominatim/OSM — sem CORS liberado pra chamar direto do navegador).
+    // Muita rua de bairro periférico não está indexada com número exato (às vezes nem a rua
+    // existe no OSM) — em vez de simplesmente falhar, tenta de novo com menos detalhe
+    // (sem número, depois só bairro+cidade), sempre conferindo se o resultado bateu mesmo
+    // na cidade/UF pedida (evita cair num bairro de mesmo nome em outra cidade).
     if (url.pathname === '/geocode' && request.method === 'GET') {
-      const address = clip(url.searchParams.get('address'), 200).trim();
-      if (!address) return json(cors, { error: 'missing_address' }, 400);
+      const street = clip(url.searchParams.get('street'), 120).trim();
+      const number = clip(url.searchParams.get('number'), 20).trim();
+      const neighborhood = clip(url.searchParams.get('neighborhood'), 80).trim();
+      const city = clip(url.searchParams.get('city'), 80).trim() || 'São Paulo';
+      const state = clip(url.searchParams.get('state'), 5).trim() || 'SP';
 
-      const nomUrl = `https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=br&q=${encodeURIComponent(address)}`;
-      const resp = await fetch(nomUrl, { headers: { 'User-Agent': 'EsthanSushiSite/1.0 (contato via esthansushi.com.br)' } });
-      const results = await resp.json();
+      const attempts = [];
+      if (street) attempts.push({ q: [street, number, neighborhood, city, state, 'Brasil'].filter(Boolean).join(', '), precision: 'exact' });
+      if (street) attempts.push({ q: [street, neighborhood, city, state, 'Brasil'].filter(Boolean).join(', '), precision: 'approximate' });
+      if (neighborhood) attempts.push({ q: [neighborhood, city, state, 'Brasil'].filter(Boolean).join(', '), precision: 'approximate' });
 
-      if (!results.length) return json(cors, { found: false });
-      const { lat, lon, display_name } = results[0];
-      return json(cors, { found: true, lat: Number(lat), lon: Number(lon), displayName: display_name });
+      for (const attempt of attempts) {
+        const nomUrl = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=1&countrycodes=br&q=${encodeURIComponent(attempt.q)}`;
+        const resp = await fetch(nomUrl, { headers: { 'User-Agent': 'EsthanSushiSite/1.0 (contato via esthansushi.com.br)' } });
+        const results = await resp.json().catch(() => []);
+        if (!results.length) continue;
+
+        const result = results[0];
+        const addr = result.address || {};
+        const resultCity = (addr.city || addr.town || addr.municipality || addr.suburb || '').toLowerCase();
+        const resultState = (addr.state_code || addr.state || '').toLowerCase();
+        const cityMatches = resultCity.includes(city.toLowerCase()) || city.toLowerCase().includes(resultCity);
+        const stateMatches = !resultState || resultState.includes(state.toLowerCase()) || resultState.includes('são paulo') || resultState.includes('sao paulo');
+        if (!cityMatches || !stateMatches) continue;
+
+        return json(cors, {
+          found: true,
+          lat: Number(result.lat),
+          lon: Number(result.lon),
+          displayName: result.display_name,
+          precision: attempt.precision,
+        });
+      }
+
+      return json(cors, { found: false });
     }
 
     // Calcula tempo estimado de entrega: rota de carro/moto até o endereço + tempo de preparo

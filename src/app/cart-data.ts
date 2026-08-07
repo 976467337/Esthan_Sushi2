@@ -122,23 +122,28 @@ export function buildOrderMessage(
   paymentInfo?: PaymentInfo,
   deliveryPaymentMethod?: DeliveryPaymentMethod,
   changeInfo?: string,
-  distanceKm?: number
+  distanceKm?: number,
+  distanceUnknown?: boolean
 ): string {
   const lines = cart.map((line) => {
     const extrasText = line.extras && line.extras.length ? ` (${line.extras.join(", ")})` : "";
     return `${line.qty}x ${line.name}${extrasText} - ${formatPrice(lineTotal(line))}`;
   });
 
-  // Acima do raio padrão, a taxa fixa não vale — o frete é combinado à parte com
-  // o cliente, então não soma nenhum valor de entrega ainda desconhecido no total.
+  // Acima do raio padrão (ou quando não deu pra confirmar a distância), a taxa fixa não
+  // vale — o frete é combinado à parte com o cliente, então não soma um valor de entrega
+  // que pode estar errado no total.
   const isFarDelivery = deliveryMode === "delivery" && !!distanceKm && distanceKm > FAR_DELIVERY_KM_THRESHOLD;
+  const needsManualFreight = isFarDelivery || (deliveryMode === "delivery" && !!distanceUnknown);
 
   const itemsTotal = cartTotal(cart);
-  const deliveryFee = deliveryMode === "delivery" && !isFarDelivery ? DELIVERY_FEE : 0;
+  const deliveryFee = deliveryMode === "delivery" && !needsManualFreight ? DELIVERY_FEE : 0;
   const grandTotal = itemsTotal + deliveryFee;
 
   const deliveryFeeLine = isFarDelivery
     ? `Taxa de entrega: A combinar — endereço a ~${String(distanceKm).replace(".", ",")}km do restaurante (acima do raio padrão de ${FAR_DELIVERY_KM_THRESHOLD}km). Falar com o cliente antes de confirmar o frete.`
+    : distanceUnknown
+    ? `Taxa de entrega: A combinar — não foi possível localizar esse endereço automaticamente no mapa pra calcular a distância. Confirmar com o cliente antes do frete.`
     : `Taxa de entrega: ${formatPrice(DELIVERY_FEE)}`;
 
   const modeBlock =
@@ -159,7 +164,7 @@ export function buildOrderMessage(
     ? `\n\nPagamento na entrega: ${deliveryPaymentMethod}${changeBlock}`
     : "\n\nPagamento: na entrega (dinheiro ou cartão com o motoboy)";
 
-  const totalLabel = isFarDelivery ? `Total (itens, frete a combinar)` : "Total";
+  const totalLabel = needsManualFreight ? `Total (itens, frete a combinar)` : "Total";
 
   return `Novo pedido pelo site:\n${scheduledBlock}\nCliente: ${customerName}\n\n${lines.join("\n")}\n\nSubtotal: ${formatPrice(itemsTotal)}${modeBlock}${paymentBlock}\n\n${totalLabel}: ${formatPrice(grandTotal)}${etaBlock}`;
 }

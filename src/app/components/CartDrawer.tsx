@@ -28,7 +28,8 @@ export function CartDrawer({
     paymentInfo?: PaymentInfo,
     deliveryPaymentMethod?: DeliveryPaymentMethod,
     changeInfo?: string,
-    distanceKm?: number
+    distanceKm?: number,
+    distanceUnknown?: boolean
   ) => void;
 }) {
   const [open, setOpen] = useState(false);
@@ -52,6 +53,7 @@ export function CartDrawer({
   const [confirmedAddress, setConfirmedAddress] = useState("");
   const [etaMinutes, setEtaMinutes] = useState<number | undefined>(undefined);
   const [distanceKm, setDistanceKm] = useState<number | undefined>(undefined);
+  const [distanceUnknown, setDistanceUnknown] = useState(false);
   const [orderId, setOrderId] = useState("");
   const [deliveryPaymentMethod, setDeliveryPaymentMethod] = useState<DeliveryPaymentMethod | null>(null);
   const [paymentMethodError, setPaymentMethodError] = useState(false);
@@ -76,6 +78,7 @@ export function CartDrawer({
     setConfirmedAddress("");
     setEtaMinutes(undefined);
     setDistanceKm(undefined);
+    setDistanceUnknown(false);
     setDeliveryPaymentMethod(null);
     setPaymentMethodError(false);
     setNeedsChange(null);
@@ -149,16 +152,24 @@ export function CartDrawer({
 
     const complementoText = complemento.trim() ? ` (${complemento.trim()})` : "";
     const fullAddress = `${cepData!.rua}, ${numero.trim()}${complementoText} - ${cepData!.bairro}, ${cepData!.cidade} - ${cepData!.uf}`;
-    const searchAddress = `${cepData!.rua}, ${numero.trim()}, ${cepData!.bairro}, ${cepData!.cidade}, ${cepData!.uf}`;
 
-    const geo = await geocodeAddress(searchAddress);
+    const geo = await geocodeAddress({
+      street: cepData!.rua ?? "",
+      number: numero.trim(),
+      neighborhood: cepData!.bairro,
+      city: cepData!.cidade,
+      state: cepData!.uf,
+    });
     const eta = geo.found && geo.lat != null && geo.lon != null ? await estimateDelivery(geo.lat, geo.lon) : null;
 
-    // Sempre mostra um tempo aproximado pro cliente — se não deu pra calcular o
-    // trajeto de verdade (endereço não geocodificou, rota falhou), cai na média
-    // que já anunciamos no site em vez de deixar sem nenhuma estimativa.
+    // Sempre mostra um tempo aproximado pro cliente — se não deu pra calcular o trajeto de
+    // verdade, cai na média que já anunciamos no site em vez de deixar sem estimativa.
+    // Mas NÃO assume que a distância é "normal" nesse caso — quando não dá pra confirmar,
+    // trata como frete a combinar (mesmo tratamento de endereço longe), pra nunca cobrar
+    // R$7 fixo num endereço que na verdade pode estar bem mais longe.
     setEtaMinutes(eta?.totalMinutes ?? FALLBACK_TOTAL_MINUTES);
     setDistanceKm(eta?.distanceKm);
+    setDistanceUnknown(!eta);
     setConfirmedAddress(fullAddress);
     setStatus("confirmed");
   };
@@ -173,20 +184,15 @@ export function CartDrawer({
     setStatus("checking");
     const complementoText = complemento.trim() ? ` (${complemento.trim()})` : "";
     const fullAddress = `${rua.trim()}, ${numero.trim()}${complementoText} - ${bairro.trim()}, São Paulo, SP`;
-    const searchAddress = `${rua.trim()}, ${numero.trim()}, ${bairro.trim()}, São Paulo, SP`;
 
-    const geo = await geocodeAddress(searchAddress);
-    if (!geo.found || geo.lat == null || geo.lon == null) {
-      setStatus("error");
-      setErrorMsg("Não conseguimos localizar esse endereço. Confira o nome da rua, o número e o bairro e tente de novo.");
-      return;
-    }
+    const geo = await geocodeAddress({ street: rua.trim(), number: numero.trim(), neighborhood: bairro.trim() });
+    const eta = geo.found && geo.lat != null && geo.lon != null ? await estimateDelivery(geo.lat, geo.lon) : null;
 
-    // Sempre mostra um tempo aproximado pro cliente — se o cálculo do trajeto falhar
-    // por algum motivo, cai na média que já anunciamos no site.
-    const eta = await estimateDelivery(geo.lat, geo.lon);
+    // Mesma lógica da busca por CEP: se não deu pra confirmar a distância de verdade,
+    // não trava o pedido — só marca frete como "a combinar" em vez de assumir R$7.
     setEtaMinutes(eta?.totalMinutes ?? FALLBACK_TOTAL_MINUTES);
     setDistanceKm(eta?.distanceKm);
+    setDistanceUnknown(!eta);
     setConfirmedAddress(fullAddress);
     setStatus("confirmed");
   };
@@ -231,13 +237,14 @@ export function CartDrawer({
       paymentInfo,
       deliveryPaymentMethod ?? undefined,
       changeInfo,
-      distanceKm
+      distanceKm,
+      distanceUnknown
     );
     setCustomerName("");
     setScheduled(false);
-    // endereço fora do raio padrão — mostra a mensagem explicando que o frete
-    // ainda vai ser combinado, em vez de fechar a gaveta direto.
-    if (isFarDelivery) {
+    // endereço fora do raio padrão (ou distância que não deu pra confirmar) — mostra a
+    // mensagem explicando que o frete ainda vai ser combinado, em vez de fechar direto.
+    if (needsManualFreight) {
       setStep("farNotice");
     } else {
       handleClose();
@@ -277,8 +284,12 @@ export function CartDrawer({
   // Fora do raio padrão de entrega — a taxa fixa de R$7 não vale mais, o frete
   // precisa ser combinado com os parceiros de entrega antes de confirmar.
   const isFarDelivery = deliveryMode === "delivery" && !!distanceKm && distanceKm > FAR_DELIVERY_KM_THRESHOLD;
+  // Não deu pra confirmar a distância automaticamente (endereço não geocodificou) — trata
+  // com a mesma cautela de um endereço longe, em vez de assumir que está tudo normal.
+  const isDistanceUnknown = deliveryMode === "delivery" && distanceUnknown;
+  const needsManualFreight = isFarDelivery || isDistanceUnknown;
 
-  const orderGrandTotal = cartTotal(cart) + (deliveryMode === "delivery" && !isFarDelivery ? DELIVERY_FEE : 0);
+  const orderGrandTotal = cartTotal(cart) + (deliveryMode === "delivery" && !needsManualFreight ? DELIVERY_FEE : 0);
 
   return (
     <>
@@ -623,14 +634,17 @@ export function CartDrawer({
                       </div>
                     )}
 
-                    {isFarDelivery && (
+                    {needsManualFreight && (
                       <div className="flex items-start gap-3 border border-amber-500/40 bg-amber-500/10 px-4 py-4">
                         <AlertCircle size={20} className="text-amber-500 flex-shrink-0 mt-0.5" />
                         <div>
-                          <p className="text-foreground text-sm font-semibold">Endereço fora do raio de 20 km</p>
+                          <p className="text-foreground text-sm font-semibold">
+                            {isFarDelivery ? "Endereço fora do raio de 20 km" : "Não conseguimos confirmar a distância"}
+                          </p>
                           <p className="text-muted-foreground text-xs mt-1 leading-relaxed">
-                            A taxa fixa de R$7 vale até 20 km. Pra esse endereço (~{String(distanceKm).replace(".", ",")}km), o frete precisa ser combinado
-                            com nossos parceiros de entrega antes de confirmar — a gente retorna com o valor certinho.
+                            {isFarDelivery
+                              ? `A taxa fixa de R$7 vale até 20 km. Pra esse endereço (~${String(distanceKm).replace(".", ",")}km), o frete precisa ser combinado com nossos parceiros de entrega antes de confirmar — a gente retorna com o valor certinho.`
+                              : "Não conseguimos localizar esse endereço automaticamente no mapa pra calcular a distância. Seu pedido será enviado normalmente e a gente confirma o valor do frete com você."}
                           </p>
                         </div>
                       </div>
@@ -644,11 +658,11 @@ export function CartDrawer({
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-muted-foreground">Taxa de entrega</span>
                         <span className="text-foreground">
-                          {deliveryMode !== "delivery" ? "Sem taxa" : isFarDelivery ? "A combinar" : formatPrice(DELIVERY_FEE)}
+                          {deliveryMode !== "delivery" ? "Sem taxa" : needsManualFreight ? "A combinar" : formatPrice(DELIVERY_FEE)}
                         </span>
                       </div>
                       <div className="flex items-center justify-between text-base font-bold pt-2 border-t border-border">
-                        <span className="text-foreground">Total{isFarDelivery ? " (frete à parte)" : ""}</span>
+                        <span className="text-foreground">Total{needsManualFreight ? " (frete à parte)" : ""}</span>
                         <span className="text-primary">{formatPrice(orderGrandTotal)}</span>
                       </div>
                     </div>
@@ -734,7 +748,7 @@ export function CartDrawer({
                       </div>
                     )}
 
-                    {isPaymentConfigured() && !isFarDelivery && (
+                    {isPaymentConfigured() && !needsManualFreight && (
                       <button onClick={goToPaymentStep}
                         className="mt-2 py-4 bg-primary text-primary-foreground font-bold tracking-widest uppercase text-sm hover:brightness-110 transition-all flex items-center justify-center gap-2">
                         <ShoppingBag size={16} /> Pagar agora (Pix ou Cartão)
@@ -743,12 +757,12 @@ export function CartDrawer({
 
                     <button onClick={confirmDeliveryPaymentAndCheckout}
                       className={
-                        isPaymentConfigured() && !isFarDelivery
+                        isPaymentConfigured() && !needsManualFreight
                           ? "py-3 border border-border text-foreground text-xs tracking-widest uppercase font-semibold hover:border-primary hover:text-primary transition-colors flex items-center justify-center gap-2"
                           : "mt-2 py-4 bg-primary text-primary-foreground font-bold tracking-widest uppercase text-sm hover:brightness-110 transition-all flex items-center justify-center gap-2"
                       }>
                       <ShoppingBag size={16} />
-                      {isPaymentConfigured() && !isFarDelivery ? "Pagar na entrega (dinheiro ou maquininha)" : "Confirmar pedido pelo WhatsApp"}
+                      {isPaymentConfigured() && !needsManualFreight ? "Pagar na entrega (dinheiro ou maquininha)" : "Confirmar pedido pelo WhatsApp"}
                     </button>
                   </div>
                 </div>
@@ -770,9 +784,13 @@ export function CartDrawer({
                   <div className="flex flex-col gap-4 items-center text-center py-4">
                     <CheckCircle2 size={36} className="text-primary" />
                     <p className="text-foreground text-base leading-relaxed">
-                      Seu pedido foi emitido normalmente. Como seu endereço fica a mais de {FAR_DELIVERY_KM_THRESHOLD} km do
-                      restaurante, precisamos alinhar o valor do frete com nossos parceiros de entrega antes de confirmar —
-                      assim que possível, retornamos por aqui (WhatsApp) com o valor certinho.
+                      {isFarDelivery
+                        ? <>Seu pedido foi emitido normalmente. Como seu endereço fica a mais de {FAR_DELIVERY_KM_THRESHOLD} km do
+                          restaurante, precisamos alinhar o valor do frete com nossos parceiros de entrega antes de confirmar —
+                          assim que possível, retornamos por aqui (WhatsApp) com o valor certinho.</>
+                        : <>Seu pedido foi emitido normalmente. Não conseguimos localizar seu endereço automaticamente no mapa
+                          pra calcular a distância, então vamos confirmar o valor do frete com você — assim que possível,
+                          retornamos por aqui (WhatsApp) com o valor certinho.</>}
                     </p>
                     <p className="text-muted-foreground text-sm">Agradecemos desde já pela compreensão! 🙏</p>
 

@@ -11,13 +11,33 @@ export const FALLBACK_TOTAL_MINUTES = 45;
 // com os parceiros de entrega antes de confirmar o pedido.
 export const FAR_DELIVERY_KM_THRESHOLD = 20;
 
-export type GeocodeResult = { found: boolean; lat?: number; lon?: number; displayName?: string };
+export type GeocodeResult = { found: boolean; lat?: number; lon?: number; displayName?: string; precision?: "exact" | "approximate" };
 export type EtaResult = { travelMinutes: number; prepMinutes: number; totalMinutes: number; distanceKm: number };
 
-export async function geocodeAddress(address: string): Promise<GeocodeResult> {
-  const resp = await fetch(`${API_BASE}/geocode?address=${encodeURIComponent(address)}`);
-  if (!resp.ok) return { found: false };
-  return resp.json();
+// Manda os campos separados (em vez de um texto só) pro Worker poder tentar de novo com
+// menos detalhe se a rua+número não estiver indexada no OSM (comum em bairro periférico),
+// sempre conferindo se o resultado bateu na cidade certa antes de aceitar.
+export async function geocodeAddress(fields: {
+  street: string;
+  number?: string;
+  neighborhood?: string;
+  city?: string;
+  state?: string;
+}): Promise<GeocodeResult> {
+  const params = new URLSearchParams({
+    street: fields.street,
+    number: fields.number ?? "",
+    neighborhood: fields.neighborhood ?? "",
+    city: fields.city ?? "São Paulo",
+    state: fields.state ?? "SP",
+  });
+  try {
+    const resp = await fetch(`${API_BASE}/geocode?${params.toString()}`);
+    if (!resp.ok) return { found: false };
+    return await resp.json();
+  } catch {
+    return { found: false };
+  }
 }
 
 export async function estimateDelivery(lat: number, lon: number): Promise<EtaResult | null> {
