@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { X, Minus, Plus, ShoppingBag, CheckCircle2, CupSoda, Expand } from "lucide-react";
-import { EXTRAS, DRINKS, FREE_SAUCE_NAMES, EXTRA_SAUCE_FEE, parsePrice, formatPrice, type CartLine, type Drink } from "@/app/cart-data";
+import { EXTRAS, DRINKS, EXTRA_SAUCE_FEE, parsePrice, formatPrice, type CartLine, type Drink } from "@/app/cart-data";
 import { ImageLightbox } from "@/app/components/ImageLightbox";
 
 type MenuItem = { name: string; price: string; img?: string };
@@ -104,36 +104,28 @@ export function OrderModal({
 
               <p className="text-muted-foreground text-xs tracking-widest uppercase mb-1">Personalizar (molhos e adicionais)</p>
               <p className="text-muted-foreground text-xs mb-3">
-                Cada unidade leva 1 potinho de cada molho marcado. Só o 1º potinho grátis (somando a quantidade) sai sem custo — os demais, + {formatPrice(EXTRA_SAUCE_FEE)} cada.
+                O 1º molho marcado sai grátis (1 potinho por unidade). A partir do 2º tipo marcado, cada potinho extra sai + {formatPrice(EXTRA_SAUCE_FEE)} por unidade.
               </p>
               <div className="flex flex-col gap-2 mb-8">
                 {EXTRAS.map((extra) => {
-                  const isFreeSauce = FREE_SAUCE_NAMES.includes(extra.name);
-                  const checked = extras.includes(extra.name);
+                  const checked = extras.includes(extra);
+                  // ordem de seleção (não a ordem da lista) decide qual é o "1º" grátis
+                  const position = checked ? extras.indexOf(extra) : extras.length;
                   let priceLabel: string;
-                  if (!isFreeSauce) {
-                    priceLabel = extra.price > 0 ? `+ ${formatPrice(extra.price)}` : "Grátis";
+                  if (position === 0) {
+                    priceLabel = "Grátis";
+                  } else if (qty === 1) {
+                    priceLabel = `+ ${formatPrice(EXTRA_SAUCE_FEE)}`;
                   } else {
-                    const selectedFreeSauces = extras.filter((e) => FREE_SAUCE_NAMES.includes(e));
-                    const position = checked ? selectedFreeSauces.indexOf(extra.name) : selectedFreeSauces.length;
-                    const packetsBefore = position * qty;
-                    if (packetsBefore === 0 && qty === 1) {
-                      priceLabel = "Grátis";
-                    } else if (packetsBefore === 0 && qty > 1) {
-                      priceLabel = `1 grátis + ${qty - 1} x ${formatPrice(EXTRA_SAUCE_FEE)}`;
-                    } else if (qty === 1) {
-                      priceLabel = `+ ${formatPrice(EXTRA_SAUCE_FEE)}`;
-                    } else {
-                      priceLabel = `+ ${qty} x ${formatPrice(EXTRA_SAUCE_FEE)}`;
-                    }
+                    priceLabel = `${qty} x ${formatPrice(EXTRA_SAUCE_FEE)}`;
                   }
                   return (
-                    <label key={extra.name}
+                    <label key={extra}
                       className="flex items-center justify-between gap-3 border border-border px-4 py-3 cursor-pointer hover:border-primary/40 transition-colors">
                       <span className="flex items-center gap-3">
-                        <input type="checkbox" checked={checked} onChange={() => toggleExtra(extra.name)}
+                        <input type="checkbox" checked={checked} onChange={() => toggleExtra(extra)}
                           className="accent-red-600" />
-                        <span className="text-foreground text-sm">{extra.name}</span>
+                        <span className="text-foreground text-sm">{extra}</span>
                       </span>
                       <span className="text-muted-foreground text-xs">{priceLabel}</span>
                     </label>
