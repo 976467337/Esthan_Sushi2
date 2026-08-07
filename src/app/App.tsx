@@ -57,17 +57,19 @@ function SectionHeader({ label, title }: { label: string; title: string }) {
   );
 }
 
-function ListItem({ name, desc, price, oldPrice, img, tall, onSelect }: { name: string; desc?: string; price: string; oldPrice?: string | null; img?: string; tall?: boolean; onSelect: () => void }) {
+function ListItem({ name, desc, price, oldPrice, img, onSelect }: { name: string; desc?: string; price: string; oldPrice?: string | null; img?: string; onSelect: () => void }) {
   return (
     <button
       onClick={onSelect}
       className="w-full flex items-center gap-4 py-4 border-b border-border group hover:bg-card/40 px-2 -mx-2 transition-colors rounded text-left"
     >
-      <div className={`photo-frame-bg flex-shrink-0 overflow-hidden rounded ${tall ? "w-14 h-20 sm:w-16 sm:h-24" : "w-16 h-16 sm:w-20 sm:h-20"}`}>
+      {/* Altura fixa, largura livre: o quadro vira exatamente do tamanho de cada foto
+          (conforme a proporção dela), então nunca sobra espaço vazio nem corta nada. */}
+      <div className="photo-frame-bg h-16 sm:h-20 flex-shrink-0 overflow-hidden rounded flex items-center justify-center">
         {img ? (
-          <ImageWithFallback src={img} alt={name} className="w-full h-full object-contain object-center" />
+          <ImageWithFallback src={img} alt={name} className="h-full w-auto max-w-[104px] sm:max-w-[128px] object-contain object-center" />
         ) : (
-          <div className="w-full h-full flex items-center justify-center">
+          <div className="w-16 sm:w-20 h-full flex items-center justify-center">
             <UtensilsCrossed size={20} className="text-muted-foreground/40" />
           </div>
         )}
@@ -371,7 +373,7 @@ export default function App() {
                     {section.title}
                   </h3>
                   <div className="divide-y divide-border">
-                    {section.items.map((item) => <ListItem key={item.name} {...item} tall={section.title === "Barcas"} onSelect={() => setActiveMenuItem(item)} />)}
+                    {section.items.map((item) => <ListItem key={item.name} {...item} onSelect={() => setActiveMenuItem(item)} />)}
                   </div>
                 </div>
               ))}
@@ -383,7 +385,7 @@ export default function App() {
             <div className="max-w-3xl mx-auto">
               <SectionHeader label="Para compartilhar com todo mundo!" title="BARCAS" />
               <div className="divide-y divide-border">
-                {BARCAS.map((item) => <ListItem key={item.name} {...item} tall onSelect={() => setActiveMenuItem(item)} />)}
+                {BARCAS.map((item) => <ListItem key={item.name} {...item} onSelect={() => setActiveMenuItem(item)} />)}
               </div>
             </div>
           )}
@@ -469,9 +471,9 @@ export default function App() {
       <section id="sobre" className="py-24 bg-card border-y border-border">
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <div className="relative">
-            <div className="aspect-square overflow-hidden bg-secondary">
+            <div className="photo-frame-bg aspect-square overflow-hidden">
               <ImageWithFallback src={imgBarcaSobre}
-                alt="Sushi fresco preparado por Esthan Sushi" className="w-full h-full object-cover" />
+                alt="Sushi fresco preparado por Esthan Sushi" className="w-full h-full object-contain" />
             </div>
             <div className="absolute -bottom-6 -right-6 w-40 h-40 bg-primary flex-col items-center justify-center text-center p-4 hidden lg:flex">
               <span className="text-3xl font-black text-primary-foreground" style={{ fontFamily: "'Orbitron', sans-serif" }}>5+</span>
