@@ -63,13 +63,14 @@ function ListItem({ name, desc, price, oldPrice, img, onSelect }: { name: string
       onClick={onSelect}
       className="w-full flex items-center gap-4 py-4 border-b border-border group hover:bg-card/40 px-2 -mx-2 transition-colors rounded text-left"
     >
-      {/* Altura fixa, largura livre: o quadro vira exatamente do tamanho de cada foto
-          (conforme a proporção dela), então nunca sobra espaço vazio nem corta nada. */}
-      <div className="photo-frame-bg h-16 sm:h-20 flex-shrink-0 overflow-hidden rounded flex items-center justify-center">
+      {/* Quadro sempre do mesmo tamanho pra todos os pratos. object-contain garante que
+          a foto nunca é cortada; o que sobra é preenchido pelo gradiente da marca
+          (photo-frame-bg) em vez de deixar espaço vazio/preto liso. */}
+      <div className="photo-frame-bg w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 overflow-hidden rounded">
         {img ? (
-          <ImageWithFallback src={img} alt={name} className="h-full w-auto max-w-[104px] sm:max-w-[128px] object-contain object-center" />
+          <ImageWithFallback src={img} alt={name} className="w-full h-full object-contain object-center" />
         ) : (
-          <div className="w-16 sm:w-20 h-full flex items-center justify-center">
+          <div className="w-full h-full flex items-center justify-center">
             <UtensilsCrossed size={20} className="text-muted-foreground/40" />
           </div>
         )}

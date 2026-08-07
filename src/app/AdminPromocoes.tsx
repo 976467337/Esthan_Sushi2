@@ -215,11 +215,11 @@ export default function AdminPromocoes() {
                         const active = !!state?.active;
                         return (
                           <div key={item.name} className="flex items-center gap-4 py-3">
-                            <div className="photo-frame-bg h-14 flex-shrink-0 overflow-hidden rounded flex items-center justify-center">
+                            <div className="photo-frame-bg w-14 h-14 flex-shrink-0 overflow-hidden rounded">
                               {item.img ? (
-                                <ImageWithFallback src={item.img} alt={item.name} className="h-full w-auto max-w-[90px] object-contain object-center" />
+                                <ImageWithFallback src={item.img} alt={item.name} className="w-full h-full object-contain object-center" />
                               ) : (
-                                <div className="w-14 h-full flex items-center justify-center">
+                                <div className="w-full h-full flex items-center justify-center">
                                   <UtensilsCrossed size={16} className="text-muted-foreground/40" />
                                 </div>
                               )}

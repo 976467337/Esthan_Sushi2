@@ -163,8 +163,8 @@ export function OrderModal({
                     <div key={drink.name}
                       className="flex items-center gap-3 border border-border px-4 py-3">
                       {drink.img ? (
-                        <span className="photo-frame-bg h-12 flex-shrink-0 rounded-sm overflow-hidden flex items-center justify-center">
-                          <img src={drink.img} alt={drink.name} className="h-full w-auto max-w-[60px] object-contain" />
+                        <span className="photo-frame-bg w-12 h-12 flex-shrink-0 rounded-sm overflow-hidden flex items-center justify-center">
+                          <img src={drink.img} alt={drink.name} className="w-full h-full object-contain" />
                         </span>
                       ) : (
                         <span className="w-12 h-12 flex items-center justify-center bg-input-background text-muted-foreground flex-shrink-0">
