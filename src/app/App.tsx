@@ -57,13 +57,13 @@ function SectionHeader({ label, title }: { label: string; title: string }) {
   );
 }
 
-function ListItem({ name, desc, price, oldPrice, img, onSelect }: { name: string; desc?: string; price: string; oldPrice?: string | null; img?: string; onSelect: () => void }) {
+function ListItem({ name, desc, price, oldPrice, img, tall, onSelect }: { name: string; desc?: string; price: string; oldPrice?: string | null; img?: string; tall?: boolean; onSelect: () => void }) {
   return (
     <button
       onClick={onSelect}
       className="w-full flex items-center gap-4 py-4 border-b border-border group hover:bg-card/40 px-2 -mx-2 transition-colors rounded text-left"
     >
-      <div className="photo-frame-bg w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 overflow-hidden rounded">
+      <div className={`photo-frame-bg flex-shrink-0 overflow-hidden rounded ${tall ? "w-14 h-20 sm:w-16 sm:h-24" : "w-16 h-16 sm:w-20 sm:h-20"}`}>
         {img ? (
           <ImageWithFallback src={img} alt={name} className="w-full h-full object-contain object-center" />
         ) : (
@@ -371,7 +371,7 @@ export default function App() {
                     {section.title}
                   </h3>
                   <div className="divide-y divide-border">
-                    {section.items.map((item) => <ListItem key={item.name} {...item} onSelect={() => setActiveMenuItem(item)} />)}
+                    {section.items.map((item) => <ListItem key={item.name} {...item} tall={section.title === "Barcas"} onSelect={() => setActiveMenuItem(item)} />)}
                   </div>
                 </div>
               ))}
@@ -383,7 +383,7 @@ export default function App() {
             <div className="max-w-3xl mx-auto">
               <SectionHeader label="Para compartilhar com todo mundo!" title="BARCAS" />
               <div className="divide-y divide-border">
-                {BARCAS.map((item) => <ListItem key={item.name} {...item} onSelect={() => setActiveMenuItem(item)} />)}
+                {BARCAS.map((item) => <ListItem key={item.name} {...item} tall onSelect={() => setActiveMenuItem(item)} />)}
               </div>
             </div>
           )}
