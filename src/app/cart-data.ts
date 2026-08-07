@@ -130,13 +130,11 @@ export function buildOrderMessage(
     return `${line.qty}x ${line.name}${extrasText} - ${formatPrice(lineTotal(line))}`;
   });
 
-  // Acima do raio padrão (endereço encontrado no mapa, mas longe demais), a taxa fixa não
+  // Acima do raio padrão (ou quando não deu pra confirmar a distância), a taxa fixa não
   // vale — o frete é combinado à parte com o cliente, então não soma um valor de entrega
-  // que pode estar errado no total. Quando o endereço não geocodifica (comum em bairro
-  // periférico, fora da base do OpenStreetMap), trata como entrega normal — cobra a taxa
-  // fixa igual sempre, só avisa o dono que a distância não foi confirmada automaticamente.
+  // que pode estar errado no total.
   const isFarDelivery = deliveryMode === "delivery" && !!distanceKm && distanceKm > FAR_DELIVERY_KM_THRESHOLD;
-  const needsManualFreight = isFarDelivery;
+  const needsManualFreight = isFarDelivery || (deliveryMode === "delivery" && !!distanceUnknown);
 
   const itemsTotal = cartTotal(cart);
   const deliveryFee = deliveryMode === "delivery" && !needsManualFreight ? DELIVERY_FEE : 0;
@@ -145,7 +143,7 @@ export function buildOrderMessage(
   const deliveryFeeLine = isFarDelivery
     ? `Taxa de entrega: A combinar — endereço a ~${String(distanceKm).replace(".", ",")}km do restaurante (acima do raio padrão de ${FAR_DELIVERY_KM_THRESHOLD}km). Falar com o cliente antes de confirmar o frete.`
     : distanceUnknown
-    ? `Taxa de entrega: ${formatPrice(DELIVERY_FEE)} (distância não confirmada automaticamente no mapa — confirmar endereço com o cliente)`
+    ? `Taxa de entrega: A combinar — não foi possível localizar esse endereço automaticamente no mapa pra calcular a distância. Confirmar com o cliente antes do frete.`
     : `Taxa de entrega: ${formatPrice(DELIVERY_FEE)}`;
 
   const modeBlock =
