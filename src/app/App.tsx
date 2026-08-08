@@ -328,7 +328,7 @@ export default function App() {
       <section className="py-10 border-y border-border bg-card">
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-border">
           {[
-            { icon: <Bike size={22} className="text-primary" />, title: "Entrega Rápida", desc: "Média de 45 minutos na sua porta" },
+            { icon: <Bike size={22} className="text-primary" />, title: "Entrega Rápida", desc: "Média de 50 minutos na sua porta" },
             { icon: <Clock size={22} className="text-primary" />, title: "Horário de Delivery", desc: "Segunda a Sábado · 19h30 às 23h" },
             { icon: <MapPin size={22} className="text-primary" />, title: "Região de Entrega", desc: "Vila Nova Cachoeirinha e região · Até 20 km por R$ 7,00" },
           ].map((info) => (
@@ -669,7 +669,7 @@ export default function App() {
         <div className="max-w-4xl mx-auto px-6 text-center relative z-10">
           <p className="text-white/80 text-xs tracking-[0.4em] uppercase mb-4 font-semibold">Delivery</p>
           <h2 className="text-4xl md:text-6xl font-black text-white mb-6 leading-tight [text-shadow:0_2px_16px_rgba(0,0,0,0.35)]" style={{ fontFamily: "'Orbitron', sans-serif" }}>
-            PEÇA AGORA,<br />COMA EM APROXIMADAMENTE 45 MIN
+            PEÇA AGORA,<br />COMA EM APROXIMADAMENTE 50 MIN
           </h2>
           <p className="text-white/90 text-lg mb-10 font-light max-w-xl mx-auto">
             Monte seu pedido no site e a gente prepara na hora. Tempo médio de entrega, pode variar conforme o
@@ -738,7 +738,7 @@ export default function App() {
               { step: "01", title: "Monte seu carrinho", desc: "Clique nos pratos que quiser direto no cardápio do site e vá adicionando ao carrinho." },
               { step: "02", title: "Entrega ou retirada", desc: "Informe seu endereço (a gente calcula o tempo estimado na hora) ou escolha retirar no local." },
               { step: "03", title: "Pagamento e envio", desc: "Escolha como vai pagar na entrega (dinheiro, crédito, débito, VR/voucher ou Pix) e envie — a mensagem já sai pronta no WhatsApp." },
-              { step: "04", title: "Aproveite!", desc: "Aguarde em média 45 minutos e é só se deliciar com os nossos pratos, preparados com todo carinho para você!" },
+              { step: "04", title: "Aproveite!", desc: "Aguarde em média 50 minutos e é só se deliciar com os nossos pratos, preparados com todo carinho para você!" },
             ].map((s) => (
               <div key={s.step} className="flex gap-5 border border-border p-5 hover:border-primary/40 transition-colors">
                 <span className="text-3xl font-black text-primary/20 leading-none flex-shrink-0" style={{ fontFamily: "'Orbitron', sans-serif" }}>{s.step}</span>

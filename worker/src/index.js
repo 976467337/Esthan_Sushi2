@@ -52,7 +52,7 @@ function json(cors, body, status = 200) {
 // coordenadas aproximadas: o OpenStreetMap não tem o número exato indexado nessa rua,
 // então usamos o ponto conhecido mais próximo da própria rua (confirmado via ViaCEP)
 const RESTAURANT_ORIGIN = { lat: -23.4737, lon: -46.6695 };
-const PREP_MINUTES = 15;
+const PREP_MINUTES = 20;
 
 // WhatsApp que recebe a notificação de novo depoimento — número separado do que
 // recebe os pedidos dos clientes. Não é segredo — só as credenciais da Green API
