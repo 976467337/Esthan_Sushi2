@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { motion } from "motion/react";
-import { Menu, X, Phone, Clock, ChevronDown, Bike, ShoppingBag, Star, MapPin, Flame, Tag, Sailboat, UtensilsCrossed, Layers, IceCreamCone, Disc, CircleDot, Circle, Heart, Fish, Soup, Images } from "lucide-react";
+import { Menu, X, Phone, Clock, ChevronDown, Bike, ShoppingBag, Star, MapPin, Flame, Tag, Sailboat, UtensilsCrossed, Layers, IceCreamCone, Disc, CircleDot, Circle, Heart, Fish, Soup, Images, Settings } from "lucide-react";
 import { ImageWithFallback } from "@/app/components/figma/ImageWithFallback";
 import { OrderModal } from "@/app/components/OrderModal";
 import { AllReviewsModal } from "@/app/components/AllReviewsModal";
@@ -768,8 +768,9 @@ export default function App() {
           </span>
         </div>
         <div className="max-w-7xl mx-auto mt-2 text-right">
-          <a href="/admin" className="text-muted-foreground/50 text-[10px] tracking-widest hover:text-muted-foreground transition-colors">
-            Painel do dono
+          <a href="/admin" title="Painel do dono" aria-label="Painel do dono"
+            className="inline-flex text-muted-foreground/40 hover:text-muted-foreground transition-colors">
+            <Settings size={13} />
           </a>
         </div>
       </footer>
