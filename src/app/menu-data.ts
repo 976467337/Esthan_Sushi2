@@ -101,8 +101,8 @@ export const TEMAKIS: MenuItem[] = [
 export const HOT_ROLLS: MenuItem[] = [
   // fotos trocadas a pedido do dono (17/08) — o arquivo "doritos-especial" mostrava
   // o Hot Especial e vice-versa
-  { name: "Hot Roll Doritos Especial", desc: "Arroz, salmão grelhado, cream cheese, cebolinha e doritos · 8 unidades", price: "R$ 35,90", img: imgHotRollEspecial },
-  { name: "Hot Roll Especial", desc: "Arroz, salmão, cream cheese e cebolinha · 8 unidades", price: "R$ 35,90", img: imgHotRollDoritosEspecial },
+  { name: "Hot Roll Doritos Especial", desc: "Arroz, salmão grelhado, cream cheese, cebolinha e doritos · 8 unidades", price: "R$ 35,90", img: imgHotRollDoritosEspecial },
+  { name: "Hot Roll Especial", desc: "Arroz, salmão, cream cheese e cebolinha · 8 unidades", price: "R$ 35,90", img: imgHotRollEspecial },
   { name: "Hot Roll Salmão", desc: "Arroz, salmão, cream cheese e cebolinha · 8 unidades", price: "R$ 29,90", img: imgHotRollSalmao },
 ];
 
